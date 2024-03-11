@@ -11,8 +11,8 @@ Async database abstraction layer for [ReactPHP](https://reactphp.org/).
 * [Streaming example](#streaming-example)
 * [Usage](#usage)
   * [Config](#config)
-  * [QueryBuilder](#querybuilder)
-  * [ConditionBuilder](#conditionbuilder)
+  * [QueryBuilder](#query-builder)
+  * [ConditionBuilder](#condition-builder)
   * [Result](#result)
   * [ResultStream](#resultstream)
 * [Install](#install)
@@ -242,9 +242,9 @@ It automatically adds values as parameters.
 public function where(Condition|ConditionGroup|callable $condition): static;
 ```
 
-See [ConditionBuilder](#conditionbuilder).
+See [ConditionBuilder](#condition-builder).
 
-By providing a callable parameter as $condition, it will start a new [ConditionBuilder](#conditionbuilder).
+By providing a callable parameter as $condition, it will start a new [ConditionBuilder](#condition-builder).
 
 For simple `WHERE` conditions, you can provide `Condition` or `ConditionGroup` directly.
 
@@ -254,7 +254,7 @@ For simple `WHERE` conditions, you can provide `Condition` or `ConditionGroup` d
 public function andWhere(Condition|ConditionGroup|callable $condition): static;
 ```
 
-Add `AND` condition. By providing a callable parameter as $condition, it will start a new [ConditionBuilder](#conditionbuilder).
+Add `AND` condition. By providing a callable parameter as $condition, it will start a new [ConditionBuilder](#condition-builder).
 
 #### orWhere()
 
@@ -262,7 +262,7 @@ Add `AND` condition. By providing a callable parameter as $condition, it will st
 public function orWhere(Condition|ConditionGroup|callable $condition): static;
 ```
 
-Add `OR` condition. By providing a callable parameter as $condition, it will start a new [ConditionBuilder](#conditionbuilder).
+Add `OR` condition. By providing a callable parameter as $condition, it will start a new [ConditionBuilder](#condition-builder).
 
 #### condition()
 
@@ -270,7 +270,7 @@ Add `OR` condition. By providing a callable parameter as $condition, it will sta
 public function condition(string $expression = null, string $operator = '=', string $value = '?'): Condition|ConditionBuilder;
 ```
 
-Create a simple condition or start [ConditionBuilder](#conditionbuilder).
+Create a simple condition or start [ConditionBuilder](#condition-builder).
 
 #### orderBy()
 
