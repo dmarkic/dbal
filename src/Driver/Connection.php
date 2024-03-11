@@ -6,6 +6,7 @@ namespace Blrf\Dbal\Driver;
 
 use Blrf\Dbal\Connection as ConnectionInterface;
 use Blrf\Dbal\Config;
+use Blrf\Dbal\ResultStream;
 use React\Promise\PromiseInterface;
 
 use function React\Promise\resolve;
@@ -44,6 +45,12 @@ abstract class Connection implements ConnectionInterface
      * @return PromiseInterface<Result>
      */
     abstract public function execute(string $sql, array $params = []): PromiseInterface;
+
+    /**
+     * Execute streaming query on connection
+     * @return ResultStream
+     */
+    abstract public function stream(string $sql, array $params = []): ResultStream;
 
     /**
      * Set underlying native connection

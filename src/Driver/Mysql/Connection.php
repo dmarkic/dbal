@@ -6,6 +6,7 @@ namespace Blrf\Dbal\Driver\Mysql;
 
 use Blrf\Dbal\Config;
 use Blrf\Dbal\Result;
+use Blrf\Dbal\ResultStream;
 use Blrf\Dbal\Driver\Connection as DriverConnection;
 use React\Mysql\MysqlClient;
 use React\Mysql\MysqlResult;
@@ -47,5 +48,10 @@ class Connection extends DriverConnection
                 );
             }
         );
+    }
+
+    public function stream(string $sql, array $params = []): ResultStream
+    {
+        return new ResultStream($this->getNativeConnection()->queryStream($sql, $params));
     }
 }

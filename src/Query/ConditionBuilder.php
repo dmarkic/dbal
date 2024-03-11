@@ -14,7 +14,7 @@ class ConditionBuilder
     /**
      * Start grouped AND condition
      */
-    public function and(Condition|ConditionGroup ...$condition)
+    public function and(Condition|ConditionGroup ...$condition): ConditionGroup
     {
         return new ConditionGroup(ConditionType::AND, ...$condition);
     }
@@ -22,7 +22,7 @@ class ConditionBuilder
     /**
      * Start grouped OR condition
      */
-    public function or(Condition|ConditionGroup ...$condition)
+    public function or(Condition|ConditionGroup ...$condition): ConditionGroup
     {
         return new ConditionGroup(ConditionType::OR, ...$condition);
     }

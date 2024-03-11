@@ -6,6 +6,9 @@ namespace Blrf\Dbal;
 
 use Countable;
 
+/**
+ * Result class
+ */
 class Result implements Countable
 {
     public function __construct(

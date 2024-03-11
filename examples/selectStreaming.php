@@ -21,10 +21,16 @@ $config->create()->then(
             ->setParameters(['9789998691568', 1, 'Moby Dick'])
             ->limit(3);
         // sql: SELECT * FROM book WHERE ((isbn13 = ? AND language_id = ?) OR title = ?) LIMIT 3
-        return $qb->execute();
-    }
-)->then(
-    function (Blrf\Dbal\Result $result) {
-        print_r($result->rows);
+        $stream = $qb->stream();
+        $stream->on('data', function (array $row) {
+            echo " - received row: \n";
+            print_r($row);
+        });
+        $stream->on('error', function (\Throwable $e) {
+            echo " ! error: " . $e->getMessage() . "\n";
+        });
+        $stream->on('close', function () {
+            echo " - Stream done\n";
+        });
     }
 );

@@ -26,9 +26,18 @@ interface QueryBuilderInterface
 
     public function value(string $column, mixed $value): static;
 
+    /**
+     * Add values for insert or update
+     *
+     * Array: [ column => value, ...]
+     */
     public function values(array $values): static;
 
     public function where(Condition|ConditionGroup|callable $condition): static;
+
+    public function andWhere(Condition|ConditionGroup|callable $condition): static;
+
+    public function orWhere(Condition|ConditionGroup|callable $condition): static;
 
     public function orderBy(string $orderBy, string $type = 'ASC'): static;
 
@@ -36,7 +45,7 @@ interface QueryBuilderInterface
 
     public function setParameters(array $params): static;
 
-    public function addParameter(mixed $param): static;
+    public function addParameter(mixed ...$param): static;
 
     public function getParameters(): array;
 
