@@ -85,6 +85,11 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * ## `where` Condition|ConditionGroup
      *
+     * Simple condition: ['ex', 'op', 'value'] or
+     * ['expression' => 'ex', 'operator' => 'op', 'value' => 'value']
+     *
+     * Group condition: ['TYPE' => [... conditions ... ] ]
+     *
      *
      * ## `orderBy` array
      *
@@ -147,7 +152,9 @@ class QueryBuilder implements QueryBuilderInterface
             }
         }
         $qb->columns = $data['columns'] ?? [];
-        $qb->where = $data['where'] ?? null;
+        if (isset($data['where']) && is_array($data['where'])) {
+            $qb->where  = Condition::fromArray($data['where']);
+        }
 
         /**
          * orderBy expressions
@@ -192,7 +199,7 @@ class QueryBuilder implements QueryBuilderInterface
             'select'    => array_map(fn($expr) => $expr->toArray(), $this->select),
             'from'      => array_map(fn($expr) => $expr->toArray(), $this->from),
             'columns'   => $this->columns,
-            'where'     => $this->where,
+            'where'     => $this->where === null ? null : $this->where->toArray(),
             'orderBy'   => array_map(fn($expr) => $expr->toArray(), $this->orderBy),
             'limit'     => ($this->limit === null ? null : $this->limit->toArray()),
             'parameters'    => $this->parameters

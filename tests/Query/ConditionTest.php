@@ -18,6 +18,58 @@ class ConditionTest extends TestCase
     {
         $c = new Condition('expr', 'op', 'value');
         $this->assertSame('expr op value', (string)$c);
+        $exp = [
+            'expression'    => 'expr',
+            'operator'      => 'op',
+            'value'         => 'value'
+        ];
+    }
+
+    public function testConditionToAndFromArray()
+    {
+        $c = new Condition('expr', 'op', 'value');
+        $exp = [
+            'expression'    => 'expr',
+            'operator'      => 'op',
+            'value'         => 'value'
+        ];
+        $this->assertSame($exp, $c->toArray());
+        $ca = Condition::fromArray($c->toArray());
+        $this->assertSame($c->toArray(), $ca->toArray());
+        $data = ['expression' => 'expr'];
+        $c = Condition::fromArray($data);
+        $this->assertSame('expr', $c->expression);
+        $this->assertSame('=', $c->operator);
+        $this->assertSame('?', $c->value);
+        $data = ['expression' => 'expr', 'operator' => 'op'];
+        $c = Condition::fromArray($data);
+        $this->assertSame('expr', $c->expression);
+        $this->assertSame('op', $c->operator);
+        $this->assertSame('?', $c->value);
+        $data = ['expression' => 'expr', 'operator' => 'op', 'value' => 'value'];
+        $c = Condition::fromArray($data);
+        $this->assertSame('expr', $c->expression);
+        $this->assertSame('op', $c->operator);
+        $this->assertSame('value', $c->value);
+    }
+
+    public function testConditionFromListArray()
+    {
+        $data = ['expr'];
+        $c = Condition::fromArray($data);
+        $this->assertSame('expr', $c->expression);
+        $this->assertSame('=', $c->operator);
+        $this->assertSame('?', $c->value);
+        $data = ['expr', 'op'];
+        $c = Condition::fromArray($data);
+        $this->assertSame('expr', $c->expression);
+        $this->assertSame('op', $c->operator);
+        $this->assertSame('?', $c->value);
+        $data = ['expr', 'op', 'value'];
+        $c = Condition::fromArray($data);
+        $this->assertSame('expr', $c->expression);
+        $this->assertSame('op', $c->operator);
+        $this->assertSame('value', $c->value);
     }
 
     public function testConditionGroupToString()
@@ -28,6 +80,33 @@ class ConditionTest extends TestCase
             new Condition('c', 'eq', 'd')
         );
         $this->assertSame('(a eq b AND c eq d)', (string)$c);
+    }
+
+    public function testConditionGroupToAndFromArray()
+    {
+        $c = new ConditionGroup(
+            'AND',
+            new Condition('a', 'eq', 'b'),
+            new Condition('c', 'eq', 'd')
+        );
+        $data = $c->toArray();
+        $exp = [
+            'AND'   => [
+                [
+                    'expression'    => 'a',
+                    'operator'      => 'eq',
+                    'value'         => 'b'
+                ],
+                [
+                    'expression'    => 'c',
+                    'operator'      => 'eq',
+                    'value'         => 'd'
+                ]
+            ]
+        ];
+        $this->assertSame($exp, $data);
+        $nc = ConditionGroup::fromArray($data);
+        $this->assertSame($exp, $nc->toArray());
     }
 
     public function testConditionBuilderSimple()
@@ -49,5 +128,37 @@ class ConditionTest extends TestCase
             )
         );
         $this->assertSame('(a = b AND c = d AND (e = f OR g = h))', (string)$c);
+        $exp = [
+            'AND' => [
+                [
+                    'expression' => 'a',
+                    'operator' => '=',
+                    'value' => 'b'
+                ],
+                [
+                    'expression' => 'c',
+                    'operator' => '=',
+                    'value' => 'd'
+                ],
+                [
+                    'OR' => [
+                        [
+                            'expression' => 'e',
+                            'operator' => '=',
+                            'value' => 'f'
+                        ],
+                        [
+                            'expression' => 'g',
+                            'operator' => '=',
+                            'value' => 'h'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        $data = $c->toArray();
+        $this->assertSame($exp, $data);
+        $nc = Condition::fromArray($data);
+        $this->assertSame($exp, $nc->toArray());
     }
 }

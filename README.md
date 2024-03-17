@@ -125,6 +125,62 @@ To use `scheme`, you can also register your driver with `Config::addDriver('mydr
 
 Query builder for connection is obtained via `Connection::query()` method.
 
+#### Query builder as an array
+
+You can create or export query builder as an array.
+
+Use `QueryBuilder::fromArray()`  or `QueryBuilder::toArray()`.
+
+##### Array keys
+
+###### `class` string
+
+Which class to use to construct query builder (defaults to static class)
+
+###### `type` string
+
+Type of query (default: SELECT)
+
+###### `select` string|array
+
+Select expressions
+
+String: EXPRESSION AS ALIAS, EXPRESSION AS ALIAS, ...
+Array: [['expression' => 'EXPRESSION', 'alias' => 'ALIAS'], ...]
+
+###### `from` string|array|QueryBuilder
+
+From expressions
+
+String: NA; TBD!
+Array: [['expression' => 'EXPRESSION'], 'alias' => 'ALIAS']
+Array with subquery: [['expression' => QueryBuilder::toArray(), 'alias' => 'ALIAS']]
+
+###### `columns` array
+
+List of `INSERT` or `UPDATE` columns
+
+###### `where` Condition|ConditionGroup
+
+Simple condition: `['ex', 'op', 'value']` or
+`['expression' => 'ex', 'operator' => 'op', 'value' => 'value']`
+
+Group condition: `['TYPE' => [... conditions ... ] ]`
+
+###### `orderBy` array
+
+List of `ORDER BY` columns
+
+###### `limit` array
+
+String: 'LIMIT l OFFSET o'
+Array: `['limit' => limit, 'offset' => offset]` or `$data['limit']`, `$data['offset']`
+
+###### `parameters` array
+
+List of parameters
+
+
 #### SELECT query
 
 Select query is started with `$queryBuilder->select('column AS A', 'column AS B', '...more...')`.
@@ -318,7 +374,7 @@ public function getParameters(): array;
 
 ### Condition builder
 
-Condition builder is used to build condition for `WHERE` and `HAVING`.
+Condition builder is used to build conditions for `WHERE` and `HAVING`.
 
 Example on how to build complex conditions:
 
@@ -342,8 +398,7 @@ Condition builder will generate SQL: `(a = b AND c = d AND (e = f OR g = h))`
 Create new `ConditionGroup` of type `AND`.
 
 ```php
-public function and(Condition|ConditionGroup ...$condition): ConditionGroup
-)
+public function and(Condition|ConditionGroup ...$condition): ConditionGroup;
 ```
 
 ### or()
@@ -351,7 +406,7 @@ public function and(Condition|ConditionGroup ...$condition): ConditionGroup
 Create new `ConditionGroup` of type `OR`.
 
 ```php
-public function or(Condition|ConditionGroup ...$condition): ConditionGroup
+public function or(Condition|ConditionGroup ...$condition): ConditionGroup;
 ```
 
 ### condition()
@@ -359,7 +414,7 @@ public function or(Condition|ConditionGroup ...$condition): ConditionGroup
 Create new `Condition`.
 
 ```php
-public function condition(string $expression, string $operator, string $value = '?'): Condition
+public function condition(string $expression, string $operator, string $value = '?'): Condition;
 ```
 
 ### eq()
@@ -367,7 +422,7 @@ public function condition(string $expression, string $operator, string $value = 
 Create new equal `Condition`.
 
 ```php
-public function eq(string $expression, string $value = '?'): Condition
+public function eq(string $expression, string $value = '?'): Condition;
 ```
 
 #### Condition
@@ -391,7 +446,7 @@ A simple `Condition` consists of `expression`, `operator` and `value`.
 
 Result stream is returned for streaming queries.
 
-It's a simple implementation of [ReadableStreamInterface](https://github.com/reactphp/stream#readablestreaminterface) or [ReactPHP Stream](https://github.com/reactphp/stream) package.
+It's a simple implementation of [ReadableStreamInterface](https://github.com/reactphp/stream#readablestreaminterface) of [ReactPHP Stream](https://github.com/reactphp/stream) package.
 
 ## Install
 
