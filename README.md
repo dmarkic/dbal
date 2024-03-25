@@ -1,5 +1,7 @@
 # Async DBAL
 
+[![CI status](https://github.com/dmarkic/dbal/actions/workflows/ci.yml/badge.svg)](https://github.com/dmarkic/dbal/actions)
+
 Async database abstraction layer for [ReactPHP](https://reactphp.org/).
 
 > **Development version**: This project is currently in development.
