@@ -7,7 +7,6 @@ namespace Blrf\Dbal\Query;
 /**
  * Condition builder
  *
- * Add more operator methods.
  */
 class ConditionBuilder
 {
@@ -35,5 +34,50 @@ class ConditionBuilder
     public function eq(string $expression, string $value = '?'): Condition
     {
         return $this->condition($expression, '=', $value);
+    }
+
+    public function neq(string $expression, string $value = '?'): Condition
+    {
+        return $this->condition($expression, '<>', $value);
+    }
+
+    public function lt(string $expression, string $value = '?'): Condition
+    {
+        return $this->condition($expression, '<', $value);
+    }
+
+    public function lte(string $expression, string $value = '?'): Condition
+    {
+        return $this->condition($expression, '<=', $value);
+    }
+
+    public function gt(string $expression, string $value = '?'): Condition
+    {
+        return $this->condition($expression, '>', $value);
+    }
+
+    public function gte(string $expression, string $value = '?'): Condition
+    {
+        return $this->condition($expression, '>=', $value);
+    }
+
+    public function isNull(string $expression): Condition
+    {
+        return $this->condition($expression, 'IS NULL');
+    }
+
+    public function isNotNull(string $expression): Condition
+    {
+        return $this->condition($expression, 'IS NOT NULL');
+    }
+
+    public function like(string $expression, string $value = '?'): Condition
+    {
+        return $this->condition($expression, 'LIKE', $value);
+    }
+
+    public function notLike(string $expression, string $value = '?'): Condition
+    {
+        return $this->condition($expression, 'NOT LIKE', $value);
     }
 }

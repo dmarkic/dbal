@@ -3,6 +3,7 @@
 namespace Blrf\Tests\Dbal\Driver\Mysql;
 
 use Blrf\Dbal\Config;
+use Blrf\Dbal\ResultStream;
 use Blrf\Dbal\Driver\Connection as DriverConnection;
 use Blrf\Dbal\Driver\Mysql\Connection;
 use Blrf\Dbal\Driver\Mysql\QueryBuilder;
@@ -54,24 +55,23 @@ class ConnectionTest extends TestCase
         $this->assertSame($ret->affectedRows, $result->affectedRows);
         $this->assertSame($ret->warningCount, $result->warningCount);
     }
-    /*
-    public function testConnect()
+
+    public function testStream()
     {
-        $config = new Config('mysql://localhost/database');
+        $stream = $this->createMock(ResultStream::class);
+
+        $sql = 'SELECT 1+1';
+        $params = ['param'];
+
+        $config = new Config();
+
+        $mysqlConnection = $this->createMock(MysqlConnection::class);
+        $mysqlConnection->expects($this->once())->method('queryStream')->with($sql, $params)->willReturn($stream);
         $connection = $this->getMockBuilder(Connection::class)
             ->setConstructorArgs([$config])
-            ->onlyMethods(['setNativeConnection'])
+            ->onlyMethods(['getNativeConnection'])
             ->getMock();
-        $connection->expects($this->once())->method('setNativeConnection')->with($this->anything());
-        $connection->connect();
+        $connection->method('getNativeConnection')->willReturn($mysqlConnection);
+        $connection->stream($sql, $params);
     }
-
-    public function testQuery()
-    {
-        $config = new Config('mysql://localhost/database');
-        $connection = new Connection($config);
-        $qb = $connection->query();
-    }
-    */
-
 }

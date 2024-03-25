@@ -8,6 +8,7 @@ use Blrf\Dbal\Query\Condition;
 use Blrf\Dbal\Query\ConditionBuilder;
 use Blrf\Dbal\Query\ConditionGroup;
 use PHPUnit\Framework\Attributes\CoversClass;
+use ValueError;
 
 #[CoversClass(Condition::class)]
 #[CoversClass(ConditionBuilder::class)]
@@ -160,5 +161,141 @@ class ConditionTest extends TestCase
         $this->assertSame($exp, $data);
         $nc = Condition::fromArray($data);
         $this->assertSame($exp, $nc->toArray());
+    }
+
+    public function testOperators()
+    {
+        $b = new ConditionBuilder();
+        $c = $b->eq('expression', 'value');
+        $this->assertSame('expression = value', (string)$c, 'eq operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => '=',
+                'value'         => 'value',
+            ],
+            $c->toArray(),
+            'eq operator toArray error'
+        );
+
+        $c = $b->neq('expression', 'value');
+        $this->assertSame('expression <> value', (string)$c, 'neq operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => '<>',
+                'value'         => 'value',
+            ],
+            $c->toArray(),
+            'neq operator toArray error'
+        );
+
+        $c = $b->lt('expression', 'value');
+        $this->assertSame('expression < value', (string)$c, 'lt operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => '<',
+                'value'         => 'value',
+            ],
+            $c->toArray(),
+            'lt operator toArray error'
+        );
+
+        $c = $b->lte('expression', 'value');
+        $this->assertSame('expression <= value', (string)$c, 'lte operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => '<=',
+                'value'         => 'value',
+            ],
+            $c->toArray(),
+            'lte operator toArray error'
+        );
+
+        $c = $b->gt('expression', 'value');
+        $this->assertSame('expression > value', (string)$c, 'gt operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => '>',
+                'value'         => 'value',
+            ],
+            $c->toArray(),
+            'gt operator toArray error'
+        );
+
+        $c = $b->gte('expression', 'value');
+        $this->assertSame('expression >= value', (string)$c, 'gte operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => '>=',
+                'value'         => 'value',
+            ],
+            $c->toArray(),
+            'gte operator toArray error'
+        );
+
+        $c = $b->isNull('expression');
+        $this->assertSame('expression IS NULL', (string)$c, 'isNull operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => 'IS NULL',
+                'value'         => null,
+            ],
+            $c->toArray(),
+            'isNull operator toArray error'
+        );
+
+        $c = $b->isNotNull('expression');
+        $this->assertSame('expression IS NOT NULL', (string)$c, 'isNotNull operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => 'IS NOT NULL',
+                'value'         => null,
+            ],
+            $c->toArray(),
+            'isNotNull operator toArray error'
+        );
+
+        $c = $b->like('expression', 'value');
+        $this->assertSame('expression LIKE value', (string)$c, 'like operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => 'LIKE',
+                'value'         => 'value',
+            ],
+            $c->toArray(),
+            'like operator toArray error'
+        );
+
+        $c = $b->notLike('expression', 'value');
+        $this->assertSame('expression NOT LIKE value', (string)$c, 'notLike operator toString error');
+        $this->assertSame(
+            [
+                'expression'    => 'expression',
+                'operator'      => 'NOT LIKE',
+                'value'         => 'value',
+            ],
+            $c->toArray(),
+            'notLike operator toArray error'
+        );
+    }
+
+    public function testConditionFromArrayExpressionIsNullThrowsValueError()
+    {
+        $this->expectException(ValueError::class);
+        Condition::fromArray(['operator' => '=']);
+    }
+
+    public function testConditionGroupFromArrayInvalidTypeThrowsValueError()
+    {
+        $this->expectException(ValueError::class);
+        ConditionGroup::fromArray([]);
     }
 }

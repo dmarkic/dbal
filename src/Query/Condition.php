@@ -12,6 +12,11 @@ use ValueError;
  */
 class Condition implements Stringable
 {
+    protected static $noValueOperators = [
+        'is null', 'is not null'
+    ];
+
+    public readonly ?string $value;
     /**
      * Create condition from array
      *
@@ -54,13 +59,17 @@ class Condition implements Stringable
     public function __construct(
         public readonly string $expression,
         public readonly string $operator = '=',
-        public readonly string $value = '?'
+        string $value = '?'
     ) {
+        if (in_array(strtolower($operator), static::$noValueOperators)) {
+            $value = null;
+        }
+        $this->value = $value;
     }
 
     public function __toString(): string
     {
-        return $this->expression . ' ' . $this->operator . ' ' . $this->value;
+        return $this->expression . ' ' . $this->operator . ($this->value === null ? '' : ' ' . $this->value);
     }
 
     public function toArray(): array

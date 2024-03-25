@@ -207,4 +207,82 @@ class QueryBuilderTest extends TestCase
         $nqb = QueryBuilder::fromArray($qb->toArray());
         $this->assertSame($exp, $nqb->getSql());
     }
+
+    public function testFromArraySelectIsString()
+    {
+        $data = [
+            'select'    => '1'
+        ];
+        $qb = QueryBuilder::fromArray($data);
+        $exp = 'SELECT 1';
+        $this->assertSame($exp, $qb->getSql());
+    }
+
+    public function testFromArraySelectIsArrayWithString()
+    {
+        $data = [
+            'select'    => ['1']
+        ];
+        $qb = QueryBuilder::fromArray($data);
+        $exp = 'SELECT 1';
+        $this->assertSame($exp, $qb->getSql());
+    }
+
+    public function testFromArrayFromIsString()
+    {
+        $data = [
+            'select'    => '1',
+            'from'      => 'table'
+        ];
+        $qb = QueryBuilder::fromArray($data);
+        $exp = 'SELECT 1 FROM table';
+        $this->assertSame($exp, $qb->getSql());
+    }
+
+    public function testFromArrayFromIsArrayWithString()
+    {
+        $data = [
+            'select'    => '1',
+            'from'      => ['table']
+        ];
+        $qb = QueryBuilder::fromArray($data);
+        $exp = 'SELECT 1 FROM table';
+        $this->assertSame($exp, $qb->getSql());
+    }
+
+    public function testFromArrayOrderByIsString()
+    {
+        $data = [
+            'select'    => '1',
+            'from'      => 'table',
+            'orderBy'   => 'column ASC'
+        ];
+        $qb = QueryBuilder::fromArray($data);
+        $exp = 'SELECT 1 FROM table ORDER BY column ASC';
+        $this->assertSame($exp, $qb->getSql());
+    }
+
+    public function testFromArrayOrderByIsArrayWithString()
+    {
+        $data = [
+            'select'    => '1',
+            'from'      => 'table',
+            'orderBy'   => ['column ASC']
+        ];
+        $qb = QueryBuilder::fromArray($data);
+        $exp = 'SELECT 1 FROM table ORDER BY column ASC';
+        $this->assertSame($exp, $qb->getSql());
+    }
+
+    public function testFromArrayLimitDirectlyInData()
+    {
+        $data = [
+            'select'    => '1',
+            'limit'     => 1,
+            'offset'    => 2
+        ];
+        $qb = QueryBuilder::fromArray($data);
+        $exp = 'SELECT 1 LIMIT 1 OFFSET 2';
+        $this->assertSame($exp, $qb->getSql());
+    }
 }

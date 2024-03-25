@@ -3,6 +3,7 @@
 namespace Blrf\Tests\Dbal\Driver\Mysql;
 
 use Blrf\Dbal\Connection;
+use Blrf\Dbal\ResultStream;
 use Blrf\Dbal\Driver\QueryBuilder as DriverQueryBuilder;
 use Blrf\Dbal\Driver\Mysql\QueryBuilder;
 use Blrf\Tests\Dbal\TestCase;
@@ -29,5 +30,21 @@ class QueryBuilderTest extends TestCase
         $qb->method('getParameters')->willReturn($params);
         $ret = await($qb->execute());
         $this->assertSame('res', $ret);
+    }
+
+    public function testStream()
+    {
+        $stream = $this->createMock(ResultStream::class);
+        $sql = 'SELECT 1 + 1';
+        $params = ['param' => true];
+        $connection = $this->createMock(Connection::class);
+        $connection->expects($this->once())->method('stream')->with($sql, $params)->willReturn($stream);
+        $qb = $this->getMockBuilder(QueryBuilder::class)
+            ->setConstructorArgs([$connection])
+            ->onlyMethods(['getSql', 'getParameters'])
+            ->getMock();
+        $qb->method('getSql')->willReturn($sql);
+        $qb->method('getParameters')->willReturn($params);
+        $stream = $qb->stream();
     }
 }

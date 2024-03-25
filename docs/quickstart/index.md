@@ -1,23 +1,8 @@
-# Async DBAL
+# Quickstart example
 
-Async database abstraction layer for [ReactPHP](https://reactphp.org/).
 
-> **Development version**: This project is currently in development.
-> This is a proof-of-concept for [ReactPHP ORM](https://github.com/dmarkic/orm) that uses this DBAL.
-
-Full example is available in [Bookstore respository](https://github.com/dmarkic/orm-bookstore-example).
-Bookstore example uses [blrf/dbal](https://github.com/dmarkic/dbal), [blrf/orm](https://github.com/dmarkic/orm) and [framework-x](https://github.com/reactphp-framework/framework-x) to showcase current DBAL/ORM development.
-
-DBAL documentation is available at [https://blrf.net/dbal/](https://blrf.net/dbal/).
-
-**Table of contents**
-
-* [Example](#example)
-* [Streaming example](#streaming-example)
-* [Usage](#usage)
-* [Install](#install)
-* [Tests](#tests)
-* [License](#license)
+!!! note
+    These examples use the [Orm bookstore example](https://github.com/dmarkic/orm-bookstore-example) database available on GitHub.
 
 ## Example
 
@@ -53,12 +38,15 @@ $config->create()->then(
 );
 ```
 
+This example uses [Config](../api/config.md) to setup a Mysql connection to `bookstore` database and performs a simple query which returns [Result](../api/result.md) by calling driver `execute()` method.
+
 ## Streaming example
 
-This method returns a readable stream that will emit each row of the result set as a `data` event.
-It will only buffer data to complete a single row in memory and will not store the whole result set. This allows you to process result sets of unlimited size that would not otherwise fit into memory.
+Streaming results are utilizing [react/stream](https://github.com/reactphp/stream) readable stream which emits each row of the result as a `data` event. It will only buffer data to complete a single row in memory and will not store the whole result set. This allows you to process result sets of unlimited size that would not otherwise fit into memory.
+You can request streaming result by calling drivers `stream()` method.
 
 ```php
+<?php
 require __DIR__ . '/../vendor/autoload.php';
 $config  = new Blrf\Dbal\Config('mysql://user:pass@localhost/bookstore');
 
@@ -95,31 +83,3 @@ $config->create()->then(
 );
 ```
 
-## Usage
-
-Please see the [DBAL documentation site](https://blrf.net/dbal/).)
-
-## Install
-
-```
-composer require blrf/dbal:dev-main
-```
-
-## Tests
-
-To run the test suite, go to project root and run:
-
-```
-vendor/bin/phpunit
-```
-
-## License
-
-MIT, see [LICENSE file](LICENSE).
-
-## Todo
-
-- Write more examples
-- Write having
-- Write joins
-- Schema manager

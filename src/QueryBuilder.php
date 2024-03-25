@@ -244,7 +244,7 @@ class QueryBuilder implements QueryBuilderInterface
      * $qb->insert('table')->values(['col' => 'val']);
      * ```
      */
-    public function insert(string|QueryBuilderInterface $into, string $as = null): static
+    public function insert(string $into, string $as = null): static
     {
         $this->setType(Type::INSERT);
         return $this->into($into, $as);
@@ -483,7 +483,9 @@ class QueryBuilder implements QueryBuilderInterface
                 return $sql;
                 break;
             default:
+                // @codeCoverageIgnoreStart
                 throw new TypeError('Unknown type: ' . $this->type);
+                // @codeCoverageIgnoreEnd
         }
     }
 
@@ -621,13 +623,10 @@ class QueryBuilder implements QueryBuilderInterface
     }
 
     public function createOrderByExpression(
-        OrderByExpression|string $expr,
+        string $expr,
         OrderByType|string $type = 'ASC'
     ): OrderByExpression {
-        if (is_string($expr)) {
-            return new OrderByExpression($expr, $type);
-        }
-        return $expr;
+        return new OrderByExpression($expr, $type);
     }
 
     public function addOrderByExpression(OrderByExpression $expr): static

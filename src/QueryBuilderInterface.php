@@ -18,7 +18,7 @@ interface QueryBuilderInterface
 
     public function update(string|self $from): static;
 
-    public function insert(string|self $info): static;
+    public function insert(string $into): static;
 
     public function delete(string|self $from): static;
 
