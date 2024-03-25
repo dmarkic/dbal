@@ -97,7 +97,7 @@ $config->create()->then(
 
 ## Usage
 
-Please see the [DBAL documentation site](https://blrf.net/dbal/).)
+Please see the [DBAL documentation site](https://blrf.net/dbal/).
 
 ## Install
 
