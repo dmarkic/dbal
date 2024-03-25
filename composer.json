@@ -14,7 +14,7 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^11",
+        "phpunit/phpunit": "^11 || ^10",
         "react/async": "^4.2"
     }
 }
