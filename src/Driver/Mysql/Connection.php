@@ -34,10 +34,12 @@ class Connection extends DriverConnection
     /**
      * Execute sql query
      *
+     * @param array<int, string> $params
      * @return PromiseInterface<Result>
      */
     public function execute(string $sql, array $params = []): PromiseInterface
     {
+        // @phpstan-ignore-next-line
         return $this->getNativeConnection()->query($sql, $params)->then(
             function (MysqlResult $res) {
                 return new Result(
@@ -52,6 +54,7 @@ class Connection extends DriverConnection
 
     public function stream(string $sql, array $params = []): ResultStream
     {
+        // @phpstan-ignore-next-line
         return new ResultStream($this->getNativeConnection()->queryStream($sql, $params));
     }
 }

@@ -4,12 +4,13 @@ namespace Blrf\Tests\Dbal;
 
 use Blrf\Dbal\QueryBuilder;
 use Blrf\Dbal\Query\Condition;
+use Blrf\Dbal\Query\OrderByExpression;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(QueryBuilder::class)]
 class QueryBuilderTest extends TestCase
 {
-    public function testEmptyQueryBuilder()
+    public function testEmptyQueryBuilder(): void
     {
         $qb = new QueryBuilder();
         $this->assertSame('SELECT ', $qb->getSql());
@@ -31,7 +32,7 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals($qb, $new);
     }
 
-    public function testSelect()
+    public function testSelect(): void
     {
         $exp = 'SELECT a,b FROM c WHERE d = ? ORDER BY e ASC LIMIT 1 OFFSET 2';
         $qb = new QueryBuilder();
@@ -54,7 +55,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame(['f'], $nqb->getParameters());
     }
 
-    public function testSelectWithAddWhereWithoutPreviousWhere()
+    public function testSelectWithAddWhereWithoutPreviousWhere(): void
     {
         $exp = 'SELECT a,b FROM c WHERE d = ? ORDER BY e ASC LIMIT 1 OFFSET 2';
         $qb = new QueryBuilder();
@@ -77,7 +78,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame(['f'], $nqb->getParameters());
     }
 
-    public function testSelectWithAddWhereWithPreviousWhere()
+    public function testSelectWithAddWhereWithPreviousWhere(): void
     {
         $exp = 'SELECT a,b FROM c WHERE (d = ? AND g = ?) ORDER BY e ASC LIMIT 1 OFFSET 2';
         $qb = new QueryBuilder();
@@ -102,7 +103,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame(['f', 'h'], $nqb->getParameters());
     }
 
-    public function testSelectWithOrWhereWithoutPreviousWhere()
+    public function testSelectWithOrWhereWithoutPreviousWhere(): void
     {
         $exp = 'SELECT a,b FROM c WHERE d = ? ORDER BY e ASC LIMIT 1 OFFSET 2';
         $qb = new QueryBuilder();
@@ -125,7 +126,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame(['f'], $nqb->getParameters());
     }
 
-    public function testSelectWithOrWhereWithPreviousWhere()
+    public function testSelectWithOrWhereWithPreviousWhere(): void
     {
         $exp = 'SELECT a,b FROM c WHERE (d = ? OR g = ?) ORDER BY e ASC LIMIT 1 OFFSET 2';
         $qb = new QueryBuilder();
@@ -150,7 +151,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame(['f', 'h'], $nqb->getParameters());
     }
 
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $exp = 'UPDATE a SET b = ?, d = ? WHERE f = ? ORDER BY h ASC LIMIT 1';
         $qb = new QueryBuilder();
@@ -171,7 +172,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame(['c', 'e', 'g'], $nqb->getParameters());
     }
 
-    public function testInsert()
+    public function testInsert(): void
     {
         $exp = 'INSERT INTO a (b, d) VALUES(?, ?)';
         $qb = new QueryBuilder();
@@ -188,7 +189,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame(['c', 'f'], $nqb->getParameters());
     }
 
-    public function testDelete()
+    public function testDelete(): void
     {
         $exp = 'DELETE FROM a AS b WHERE (c = ? AND d = ?) ORDER BY e ASC, f DESC LIMIT 5';
         $qb = new QueryBuilder();
@@ -208,7 +209,16 @@ class QueryBuilderTest extends TestCase
         $this->assertSame($exp, $nqb->getSql());
     }
 
-    public function testFromArraySelectIsString()
+    public function testFromArrayClassNotQueryBuilder(): void
+    {
+        $this->expectException(\TypeError::class);
+        $data = [
+            'class' => \StdClass::class
+        ];
+        QueryBuilder::fromArray($data);
+    }
+
+    public function testFromArraySelectIsString(): void
     {
         $data = [
             'select'    => '1'
@@ -218,7 +228,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame($exp, $qb->getSql());
     }
 
-    public function testFromArraySelectIsArrayWithString()
+    public function testFromArraySelectIsArrayWithString(): void
     {
         $data = [
             'select'    => ['1']
@@ -228,7 +238,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame($exp, $qb->getSql());
     }
 
-    public function testFromArrayFromIsString()
+    public function testFromArrayFromIsString(): void
     {
         $data = [
             'select'    => '1',
@@ -239,7 +249,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame($exp, $qb->getSql());
     }
 
-    public function testFromArrayFromIsArrayWithString()
+    public function testFromArrayFromIsArrayWithString(): void
     {
         $data = [
             'select'    => '1',
@@ -250,7 +260,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame($exp, $qb->getSql());
     }
 
-    public function testFromArrayOrderByIsString()
+    public function testFromArrayOrderByIsString(): void
     {
         $data = [
             'select'    => '1',
@@ -262,7 +272,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame($exp, $qb->getSql());
     }
 
-    public function testFromArrayOrderByIsArrayWithString()
+    public function testFromArrayOrderByIsArrayWithString(): void
     {
         $data = [
             'select'    => '1',
@@ -274,7 +284,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame($exp, $qb->getSql());
     }
 
-    public function testFromArrayLimitDirectlyInData()
+    public function testFromArrayLimitDirectlyInData(): void
     {
         $data = [
             'select'    => '1',
@@ -284,5 +294,12 @@ class QueryBuilderTest extends TestCase
         $qb = QueryBuilder::fromArray($data);
         $exp = 'SELECT 1 LIMIT 1 OFFSET 2';
         $this->assertSame($exp, $qb->getSql());
+    }
+
+    public function testOrderByWithOrderByExpression(): void
+    {
+        $qb = new QueryBuilder();
+        $qb->orderBy(new OrderByExpression('expr', 'ASC'));
+        $this->assertSame('SELECT  ORDER BY expr ASC', $qb->getSql());
     }
 }

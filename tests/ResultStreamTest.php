@@ -11,7 +11,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(ResultStream::class)]
 class ResultStreamTest extends TestCase
 {
-    public function testResultStream()
+    public function testResultStream(): void
     {
         $stream = new ThroughStream();
 
@@ -26,7 +26,7 @@ class ResultStreamTest extends TestCase
         $this->assertFalse($result->isReadable());
     }
 
-    public function testOnData()
+    public function testOnData(): void
     {
         $stream = new ThroughStream();
         $result = $this->getMockBuilder(ResultStream::class)
@@ -37,7 +37,7 @@ class ResultStreamTest extends TestCase
         $result->onData(['data']);
     }
 
-    public function testOnEndNotClosed()
+    public function testOnEndNotClosed(): void
     {
         $stream = new ThroughStream();
         $result = $this->getMockBuilder(ResultStream::class)
@@ -49,7 +49,7 @@ class ResultStreamTest extends TestCase
         $result->onEnd();
     }
 
-    public function testOnEndClosed()
+    public function testOnEndClosed(): void
     {
         $stream = new ThroughStream();
         $result = $this->getMockBuilder(ResultStream::class)
@@ -61,7 +61,7 @@ class ResultStreamTest extends TestCase
         $result->onEnd();
     }
 
-    public function testOnError()
+    public function testOnError(): void
     {
         $ex = new \Exception('Testing');
         $stream = new ThroughStream();

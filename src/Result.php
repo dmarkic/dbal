@@ -11,6 +11,11 @@ use Countable;
  */
 class Result implements Countable
 {
+    /**
+     * Constructor
+     *
+     * @param array<mixed> $rows
+     */
     public function __construct(
         public readonly array $rows = [],
         public readonly ?int $insertId = null,

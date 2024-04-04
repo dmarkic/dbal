@@ -1,0 +1,14 @@
+parameters:
+    level: max
+    treatPhpDocTypesAsCertain: false
+    excludePaths:
+        # Condition::fromArray() will return Condition or ConditionGroup based on $data keys
+        # don't know how to tell that to phpstan
+        - tests/Query/ConditionTest.php
+
+    paths:
+        - src/
+        - tests/
+
+    fileExtensions:
+        - php

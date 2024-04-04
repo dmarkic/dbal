@@ -15,7 +15,7 @@ use ValueError;
 #[CoversClass(ConditionGroup::class)]
 class ConditionTest extends TestCase
 {
-    public function testConditionToString()
+    public function testConditionToString(): void
     {
         $c = new Condition('expr', 'op', 'value');
         $this->assertSame('expr op value', (string)$c);
@@ -26,7 +26,7 @@ class ConditionTest extends TestCase
         ];
     }
 
-    public function testConditionToAndFromArray()
+    public function testConditionToAndFromArray(): void
     {
         $c = new Condition('expr', 'op', 'value');
         $exp = [
@@ -54,7 +54,7 @@ class ConditionTest extends TestCase
         $this->assertSame('value', $c->value);
     }
 
-    public function testConditionFromListArray()
+    public function testConditionFromListArray(): void
     {
         $data = ['expr'];
         $c = Condition::fromArray($data);
@@ -73,7 +73,31 @@ class ConditionTest extends TestCase
         $this->assertSame('value', $c->value);
     }
 
-    public function testConditionGroupToString()
+    public function testConditionFromArrayExpressionNotString()
+    {
+        $this->expectException(ValueError::class);
+        $data['expression'] = [];
+        $c = Condition::fromArray($data);
+    }
+
+    public function testConditionFromArrayOperatorNotString()
+    {
+        $this->expectException(ValueError::class);
+        $data['expression'] = '1';
+        $data['operator'] = [];
+        $c = Condition::fromArray($data);
+    }
+
+    public function testConditionFromArrayValueNotString()
+    {
+        $this->expectException(ValueError::class);
+        $data['expression'] = '1';
+        $data['operator'] = 'eq';
+        $data['value'] = [];
+        $c = Condition::fromArray($data);
+    }
+
+    public function testConditionGroupToString(): void
     {
         $c = new ConditionGroup(
             'AND',
@@ -83,7 +107,7 @@ class ConditionTest extends TestCase
         $this->assertSame('(a eq b AND c eq d)', (string)$c);
     }
 
-    public function testConditionGroupToAndFromArray()
+    public function testConditionGroupToAndFromArray(): void
     {
         $c = new ConditionGroup(
             'AND',
@@ -110,14 +134,14 @@ class ConditionTest extends TestCase
         $this->assertSame($exp, $nc->toArray());
     }
 
-    public function testConditionBuilderSimple()
+    public function testConditionBuilderSimple(): void
     {
         $b = new ConditionBuilder();
         $c = $b->eq('expr', 'value');
         $this->assertSame('expr = value', (string)$c);
     }
 
-    public function testConditionBuilderGroups()
+    public function testConditionBuilderGroups(): void
     {
         $b = new ConditionBuilder();
         $c = $b->and(
@@ -163,7 +187,7 @@ class ConditionTest extends TestCase
         $this->assertSame($exp, $nc->toArray());
     }
 
-    public function testOperators()
+    public function testOperators(): void
     {
         $b = new ConditionBuilder();
         $c = $b->eq('expression', 'value');
@@ -287,13 +311,13 @@ class ConditionTest extends TestCase
         );
     }
 
-    public function testConditionFromArrayExpressionIsNullThrowsValueError()
+    public function testConditionFromArrayExpressionIsNullThrowsValueError(): void
     {
         $this->expectException(ValueError::class);
         Condition::fromArray(['operator' => '=']);
     }
 
-    public function testConditionGroupFromArrayInvalidTypeThrowsValueError()
+    public function testConditionGroupFromArrayInvalidTypeThrowsValueError(): void
     {
         $this->expectException(ValueError::class);
         ConditionGroup::fromArray([]);

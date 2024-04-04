@@ -6,6 +6,7 @@ namespace Blrf\Dbal\Driver;
 
 use Blrf\Dbal\Connection as ConnectionInterface;
 use Blrf\Dbal\QueryBuilder as BaseQueryBuilder;
+use Blrf\Dbal\Result;
 use Blrf\Dbal\ResultStream;
 use React\Promise\PromiseInterface;
 

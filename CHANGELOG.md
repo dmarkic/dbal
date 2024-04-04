@@ -9,3 +9,7 @@
 - Offical docs page: https://blrf.net/dbal/
 - Full coverage
 - Condtion/ConditionBuilder support for more operators (lg, lge, like, isNull, ...)
+
+## main-dev (2024-04-04)
+
+- PHPStan on max

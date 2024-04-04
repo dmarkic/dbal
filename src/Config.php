@@ -29,6 +29,7 @@ class Config implements Stringable
 {
     /**
      * Map of drivers implemented directly in this code.
+     * @var array<string,string>
      */
     protected static array $driverMap = [
         'mysql' => \Blrf\Dbal\Driver\Mysql\Driver::class
@@ -44,6 +45,10 @@ class Config implements Stringable
     protected string $user = '';
     protected ?string $pass = null;
     protected ?string $db = null;
+    /**
+     * Parameters
+     * @var array<int|string, string[]|string>
+     */
     protected array $params = [];
 
     /**
@@ -59,6 +64,8 @@ class Config implements Stringable
      * - pass
      * - db
      * - params
+     *
+     * @param array<string, string> $data
      */
     public static function fromArray(
         #[SensitiveParameter]
@@ -83,7 +90,7 @@ class Config implements Stringable
      * @throws InvalidArgumentException If driver class is not implementing Driver interface
      * @throws InvalidArgumentException if driver scheme already exists
      */
-    public static function addDriver(string $scheme, string $class)
+    public static function addDriver(string $scheme, string $class): void
     {
         $obj = new $class();
         if (!($obj instanceof Driver)) {
@@ -219,7 +226,11 @@ class Config implements Stringable
         } else {
             $class = $driver;
         }
-        return new $class();
+        $driver = new $class();
+        if ($driver instanceof Driver) {
+            return $driver;
+        }
+        throw new RuntimeException('Invalid driver: ' . $class);
     }
 
     public function setHost(string $host): self
@@ -239,7 +250,7 @@ class Config implements Stringable
         return $this;
     }
 
-    public function getPort(): int
+    public function getPort(): ?int
     {
         return $this->port;
     }
@@ -284,12 +295,14 @@ class Config implements Stringable
         return $this->db;
     }
 
+    /** @param array<int|string, string[]|string> $params */
     public function setParams(array $params): self
     {
         $this->params = $params;
         return $this;
     }
 
+    /** @return array<int|string, string[]|string> */
     public function getParams(): array
     {
         return $this->params;

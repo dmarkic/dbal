@@ -15,6 +15,7 @@ use ValueError;
 class ConditionGroup implements Stringable
 {
     public readonly ConditionType $type;
+    /** @var array<Condition|ConditionGroup> */
     protected array $conditions = [];
 
     /**
@@ -24,6 +25,8 @@ class ConditionGroup implements Stringable
      * [
      *   'type' => [ condition, ... ]
      * ]
+     *
+     * @param array{'OR': array<array<mixed>>}|array{'AND': array<array<mixed>>} $data
      */
     public static function fromArray(array $data): static
     {
@@ -37,16 +40,16 @@ class ConditionGroup implements Stringable
         }
         $type = ConditionType::from($type);
         foreach ($data[$type->value] as $key => $value) {
-            $conditions[] = Condition::fromArray($value);
+            $conditions[] = Condition::fromArray($value); /* @phpstan-ignore-line */
         }
         return new static($type, ...$conditions);
     }
 
-    public function __construct(
+    final public function __construct(
         ConditionType|string $type,
         self|Condition ...$condition
     ) {
-        $this->type = (is_string($type) ? ConditionType::from($type) : $type);
+        $this->type = (is_string($type) ? ConditionType::from(strtoupper($type)) : $type);
         $this->conditions = $condition;
     }
 
@@ -63,6 +66,8 @@ class ConditionGroup implements Stringable
      *   'type' => [ condition, ... ]
      * ]
      * ```
+     *
+     * @return non-empty-array<'AND'|'OR', array<array>>
      */
     public function toArray(): array
     {

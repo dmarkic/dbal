@@ -6,6 +6,7 @@ namespace Blrf\Dbal\Driver;
 
 use Blrf\Dbal\Connection as ConnectionInterface;
 use Blrf\Dbal\Config;
+use Blrf\Dbal\Result;
 use Blrf\Dbal\ResultStream;
 use React\Promise\PromiseInterface;
 
@@ -63,6 +64,7 @@ abstract class Connection implements ConnectionInterface
 
     /**
      * Retreive native connection
+     *
      */
     public function getNativeConnection(): mixed
     {

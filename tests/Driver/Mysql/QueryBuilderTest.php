@@ -16,7 +16,7 @@ use function React\Promise\resolve;
 #[CoversClass(DriverQueryBuilder::class)]
 class QueryBuilderTest extends TestCase
 {
-    public function testExecute()
+    public function testExecute(): void
     {
         $sql = 'SELECT 1 + 1';
         $params = ['param' => true];
@@ -32,7 +32,7 @@ class QueryBuilderTest extends TestCase
         $this->assertSame('res', $ret);
     }
 
-    public function testStream()
+    public function testStream(): void
     {
         $stream = $this->createMock(ResultStream::class);
         $sql = 'SELECT 1 + 1';

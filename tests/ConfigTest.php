@@ -14,7 +14,7 @@ use function React\Async\await;
 #[CoversClass(Config::class)]
 class ConfigTest extends TestCase
 {
-    public function testConstructorAndGetters()
+    public function testConstructorAndGetters(): void
     {
         $uri = 'mysql://user:pass@localhost:3306/db?param=yes';
         $config = new Config('mysql://user:pass@localhost:3306/db?param=yes');
@@ -29,7 +29,7 @@ class ConfigTest extends TestCase
         $this->assertSame(['param' => 'yes'], $config->getParams());
     }
 
-    public function testFromArray()
+    public function testFromArray(): void
     {
         $uri = 'mysql://user:pass@localhost:3306/db?param=yes';
         $data = [
@@ -40,13 +40,13 @@ class ConfigTest extends TestCase
         $this->assertSame('mysql://user:pass@localhost:3306/newDb?param=yes', (string)$config);
     }
 
-    public function testSetInvalidUrlThrowsInvalidArgumentException()
+    public function testSetInvalidUrlThrowsInvalidArgumentException(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $config = new Config('mysql://:3306');
     }
 
-    public function testAddAndCreateDriver()
+    public function testAddAndCreateDriver(): void
     {
         $driver = $this->createMock(Driver::class);
         Config::addDriver('test', $driver::class);
@@ -55,7 +55,7 @@ class ConfigTest extends TestCase
         Config::removeDriver('test');
     }
 
-    public function testCreateDriverWithCustomClass()
+    public function testCreateDriverWithCustomClass(): void
     {
         $driver = $this->createMock(Driver::class);
         $config = new Config('test://localhost');
@@ -63,13 +63,21 @@ class ConfigTest extends TestCase
         $this->assertInstanceOf($driver::class, $config->createDriver());
     }
 
-    public function testAddInvalidDriver()
+    public function testCreateDriverWithInvalidDriver(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $config = new Config('mysql://localhost');
+        $config->setDriver(\StdClass::class);
+        $config->createDriver();
+    }
+
+    public function testAddInvalidDriver(): void
     {
         $this->expectException(InvalidArgumentException::class);
         Config::addDriver('test1', \StdClass::class);
     }
 
-    public function testAddDriverSchemeAlreadyExists()
+    public function testAddDriverSchemeAlreadyExists(): void
     {
         $driver = $this->createMock(Driver::class);
         $ex = false;
@@ -83,7 +91,7 @@ class ConfigTest extends TestCase
         Config::removeDriver('test');
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $connection = $this->createStub(Connection::class);
         $config = $this->getMockBuilder(Config::class)->onlyMethods(['createDriver'])->getMock();

@@ -25,6 +25,8 @@ class Limit extends Expression
      *
      * - limit
      * - offset
+     *
+     * @param array{limit?:int|null, offset?:int|null} $data
      */
     public static function fromArray(array $data): static
     {
@@ -51,7 +53,7 @@ class Limit extends Expression
         if (isset($matches[3])) {
             $offset = (int)$matches[3];
         }
-        return new self($limit, $offset);
+        return new static($limit, $offset);
     }
 
     /**
@@ -59,7 +61,7 @@ class Limit extends Expression
      *
      * @throws ValueError if both arguments are null
      */
-    public function __construct(?int $limit, ?int $offset = null)
+    final public function __construct(?int $limit, ?int $offset = null)
     {
         if ($limit === null && $offset === null) {
             throw new ValueError('Both limit and offset are not set');
@@ -85,6 +87,7 @@ class Limit extends Expression
         return $ret;
     }
 
+    /** @return array{limit: int|null, offset: int|null} */
     public function toArray(): array
     {
         return ['limit' => $this->limit, 'offset' => $this->offset];

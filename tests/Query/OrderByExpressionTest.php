@@ -9,13 +9,13 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(OrderByExpression::class)]
 class OrderByExpressionTest extends TestCase
 {
-    public function testConstructWithEmptyExpressionThrowsValueError()
+    public function testConstructWithEmptyExpressionThrowsValueError(): void
     {
         $this->expectException(\ValueError::class);
         new OrderByExpression('');
     }
 
-    public function testFromArrayAndToArray()
+    public function testFromArrayAndToArray(): void
     {
         $a = [
             'expression'    => 'MyExpression',
@@ -25,14 +25,14 @@ class OrderByExpressionTest extends TestCase
         $this->assertSame($a, $e->toArray());
     }
 
-    public function testFromStringAndToStringWithType()
+    public function testFromStringAndToStringWithType(): void
     {
         $s = 'MyExpression DESC';
         $e = OrderByExpression::fromString($s);
         $this->assertSame($s, (string)$e);
     }
 
-    public function testFromStringAndToStringWithoutType()
+    public function testFromStringAndToStringWithoutType(): void
     {
         $s = 'MyExpression';
         $e = OrderByExpression::fromString($s);

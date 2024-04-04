@@ -19,6 +19,8 @@ class SelectExpression extends Expression
      *
      * - expression: string
      * - alias: ?string
+     *
+     * @param array{expression?:string, alias?:string} $data
      */
     public static function fromArray(array $data): static
     {
@@ -47,7 +49,7 @@ class SelectExpression extends Expression
      * Create select expression
      *
      */
-    public function __construct(
+    final public function __construct(
         public readonly string $expression,
         public readonly ?string $alias = null
     ) {
@@ -65,6 +67,7 @@ class SelectExpression extends Expression
         return $ret;
     }
 
+    /** @return array{expression: string, alias: string|null} */
     public function toArray(): array
     {
         return [

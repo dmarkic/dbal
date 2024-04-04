@@ -11,8 +11,10 @@ interface QueryBuilderInterface
 {
     /**
      * Create query builder from array
+     *
+     * @param array<mixed> $data
      */
-    public static function fromArray(array $data): static;
+    public static function fromArray(array $data, mixed ...$arguments): self;
 
     public function select(string ...$exprs): static;
 
@@ -29,7 +31,7 @@ interface QueryBuilderInterface
     /**
      * Add values for insert or update
      *
-     * Array: [ column => value, ...]
+     * @param array<string, mixed> $values [ column => value, ...]
      */
     public function values(array $values): static;
 
@@ -43,12 +45,25 @@ interface QueryBuilderInterface
 
     public function limit(?int $offset = null, ?int $limit = null): static;
 
+    /**
+     * @param array<int, mixed> $params
+     */
     public function setParameters(array $params): static;
 
     public function addParameter(mixed ...$param): static;
 
+    /**
+     * Get parameters
+     *
+     * @return array<int, mixed>
+     */
     public function getParameters(): array;
 
+    /**
+     * To array
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(): array;
 
     public function getSql(): string;

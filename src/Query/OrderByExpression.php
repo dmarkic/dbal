@@ -21,6 +21,8 @@ class OrderByExpression extends Expression
      *
      * - expression: string
      * - type: ?string (OrderByType)
+     *
+     * @param array{expression?: string, type?:OrderByType|string} $data
      */
     public static function fromArray(array $data): static
     {
@@ -40,7 +42,7 @@ class OrderByExpression extends Expression
         return new static($expression, $type);
     }
 
-    public function __construct(
+    final public function __construct(
         public readonly string $expression,
         OrderByType|string $type = 'ASC'
     ) {
@@ -58,6 +60,7 @@ class OrderByExpression extends Expression
         return $this->expression . ' ' . $this->type->value;
     }
 
+    /** @return array{expression: string, type: string} */
     public function toArray(): array
     {
         return ['expression' => $this->expression, 'type' => $this->type->value];

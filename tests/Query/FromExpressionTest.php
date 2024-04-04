@@ -10,20 +10,20 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(FromExpression::class)]
 class FromExpressionTest extends TestCase
 {
-    public function testConstructWithEmptyExpressionThrowsValueError()
+    public function testConstructWithEmptyExpressionThrowsValueError(): void
     {
         $this->expectException(\ValueError::class);
         new FromExpression('');
     }
 
-    public function testFromArrayAndToArraySimple()
+    public function testFromArrayAndToArraySimple(): void
     {
         $a = ['expression' => 'MyExpression', 'alias' => 'MyAlias'];
         $e = FromExpression::fromArray($a);
         $this->assertSame($a, $e->toArray());
     }
 
-    public function testFromArrayAndToArraySubquery()
+    public function testFromArrayAndToArraySubquery(): void
     {
         $a = [
             'expression'    => (new QueryBuilder())->toArray(),
@@ -33,21 +33,21 @@ class FromExpressionTest extends TestCase
         $this->assertSame($a, $e->toArray());
     }
 
-    public function testFromStringAndToStringWithAlias()
+    public function testFromStringAndToStringWithAlias(): void
     {
         $s = 'from AS alias';
         $e = FromExpression::fromString($s);
         $this->assertSame($s, (string)$e);
     }
 
-    public function testFromStringAndToStringWithoutAlias()
+    public function testFromStringAndToStringWithoutAlias(): void
     {
         $s = 'from';
         $e = FromExpression::fromString($s);
         $this->assertSame($s, (string)$e);
     }
 
-    public function testToStringWithSubquery()
+    public function testToStringWithSubquery(): void
     {
         $e = new FromExpression(new QueryBuilder(), 't1');
         $this->assertSame('(SELECT ) AS t1', (string)$e);

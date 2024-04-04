@@ -9,27 +9,27 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(Limit::class)]
 class LimitTest extends TestCase
 {
-    public function testConstructWithNoArguments()
+    public function testConstructWithNoArguments(): void
     {
         $this->expectException(\ValueError::class);
         new Limit(null);
     }
 
-    public function testFromArrayAndToArray()
+    public function testFromArrayAndToArray(): void
     {
         $a = ['limit' => 10, 'offset' => 11];
         $l = Limit::fromArray($a);
         $this->assertSame($a, $l->toArray());
     }
 
-    public function testFromStringAndToStringWithOffset()
+    public function testFromStringAndToStringWithOffset(): void
     {
         $s = 'LIMIT 10 OFFSET 20';
         $l = Limit::fromString($s);
         $this->assertSame($s, (string)$l);
     }
 
-    public function testFromStringAndToStringWithoutOffset()
+    public function testFromStringAndToStringWithoutOffset(): void
     {
         $s = 'LIMIT 10';
         $l = Limit::fromString($s);

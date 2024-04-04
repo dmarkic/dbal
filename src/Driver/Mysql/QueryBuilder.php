@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Blrf\Dbal\Driver\Mysql;
 
+use Blrf\Dbal\Result;
 use Blrf\Dbal\ResultStream;
 use Blrf\Dbal\Driver\QueryBuilder as DriverQueryBuilder;
 use React\Promise\PromiseInterface;

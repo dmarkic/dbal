@@ -53,18 +53,24 @@ class ResultStream extends EventEmitter implements ReadableStreamInterface
         $this->stream->resume();
     }
 
+    /**
+     * @param array<mixed> $options
+     */
     public function pipe(WritableStreamInterface $dest, array $options = []): WritableStreamInterface
     {
         Util::pipe($this, $dest, $options);
         return $dest;
     }
 
-    public function onData(array $data)
+    /**
+     * @param array<mixed> $data
+     */
+    public function onData(array $data): void
     {
         $this->emit('data', [$data]);
     }
 
-    public function onEnd()
+    public function onEnd(): void
     {
         if (!$this->closed) {
             $this->emit('end');
@@ -72,7 +78,7 @@ class ResultStream extends EventEmitter implements ReadableStreamInterface
         }
     }
 
-    public function onError(\Throwable $error)
+    public function onError(\Throwable $error): void
     {
         $this->emit('error', [$error]);
         $this->close();

@@ -15,7 +15,7 @@ interface Driver
     /**
      * Connect
      *
-     * @return PromiseInterface<ConnectionInterface>
+     * @return PromiseInterface<Connection>
      */
     public function connect(
         #[SensitiveParameter]

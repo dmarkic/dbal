@@ -29,12 +29,15 @@ interface Connection
 
     /**
      * Execute query on connection
+     * @param mixed[] $params
      * @return PromiseInterface<Result>
      */
     public function execute(string $sql, array $params = []): PromiseInterface;
 
     /**
      * Execute query and return stream
+     *
+     * @param mixed[] $params
      */
     public function stream(string $sql, array $params = []): ResultStream;
 

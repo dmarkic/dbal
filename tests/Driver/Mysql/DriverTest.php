@@ -17,7 +17,7 @@ class DriverTest extends TestCase
     /**
      * Nothing to test here really.
      */
-    public function testConnect()
+    public function testConnect(): void
     {
         $driver = new Driver();
         $ret = $driver->connect(new Config());

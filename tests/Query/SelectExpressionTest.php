@@ -9,13 +9,13 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(SelectExpression::class)]
 class SelectExpressionTest extends TestCase
 {
-    public function testConstructWithEmptyExpressionThrowsValueError()
+    public function testConstructWithEmptyExpressionThrowsValueError(): void
     {
         $this->expectException(\ValueError::class);
         new SelectExpression('');
     }
 
-    public function testFromArrayAndToArray()
+    public function testFromArrayAndToArray(): void
     {
         $a = [
             'expression'    => 'MyExpression',
@@ -25,14 +25,14 @@ class SelectExpressionTest extends TestCase
         $this->assertSame($a, $e->toArray());
     }
 
-    public function testFromStringAndToStringWithAlias()
+    public function testFromStringAndToStringWithAlias(): void
     {
         $s = 'MyExpression AS MyAlias';
         $e = SelectExpression::fromString($s);
         $this->assertSame($s, (string)$e);
     }
 
-    public function testFromStringAndToStringWithoutAlias()
+    public function testFromStringAndToStringWithoutAlias(): void
     {
         $s = '1+1';
         $e = SelectExpression::fromString($s);

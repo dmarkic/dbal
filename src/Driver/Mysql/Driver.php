@@ -6,6 +6,7 @@ namespace Blrf\Dbal\Driver\Mysql;
 
 use Blrf\Dbal\Config;
 use Blrf\Dbal\Driver as DriverInterface;
+use Blrf\Dbal\Connection as ConnectionInterface;
 use React\Promise\PromiseInterface;
 use SensitiveParameter;
 
@@ -14,7 +15,7 @@ class Driver implements DriverInterface
     /**
      * Connect
      *
-     * @return PromiseInterface<Connection>
+     * @return PromiseInterface<ConnectionInterface>
      */
     public function connect(
         #[SensitiveParameter]

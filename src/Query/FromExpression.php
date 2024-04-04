@@ -24,6 +24,8 @@ class FromExpression extends Expression
      *   - string
      *   - array with key 'class' will call class::fromArray() which is expected to be a QueryBuilderInterface
      * - alias
+     *
+     * @param array{expression?:string|array<mixed>, alias?:string} $data
      */
     public static function fromArray(array $data): static
     {
@@ -63,7 +65,7 @@ class FromExpression extends Expression
      *
      * QueryBuilderInterface enabled subquery
      */
-    public function __construct(
+    final public function __construct(
         public readonly string|QueryBuilderInterface $expression,
         public readonly ?string $alias = null
     ) {
@@ -80,6 +82,7 @@ class FromExpression extends Expression
         return $this->expression . ($this->alias === null ? '' : ' AS ' . $this->alias);
     }
 
+    /** @return array{expression:string|array<mixed>, alias: string|null} */
     public function toArray(): array
     {
         return [

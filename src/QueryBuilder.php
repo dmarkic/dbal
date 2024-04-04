@@ -29,7 +29,7 @@ use implode;
  */
 class QueryBuilder implements QueryBuilderInterface
 {
-    protected $type = Type::SELECT;
+    protected Type $type = Type::SELECT;
     /**
      * Select expressions
      * @var array<SelectExpression>
@@ -47,8 +47,16 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected array $columns = [];
     protected Condition|ConditionGroup|null $where = null;
+    /**
+     * Order by expressions
+     * @var array<OrderByExpression>
+     */
     protected array $orderBy = [];
     protected ?Limit $limit = null;
+    /**
+     * Parameters
+     * @var array<int|non-int-string, mixed>
+     */
     protected array $parameters = [];
 
     /**
@@ -104,13 +112,27 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * List of parameters
      *
-     * @param array $data
+     * @param array{
+     *      class?: string,
+     *      type?: string|Type,
+     *      select?: array<mixed>|string,
+     *      from?: array<mixed>|string,
+     *      columns?: array<string>,
+     *      where?:array<mixed>|null,
+     *      values?:array<string,mixed>,
+     *      orderBy?:array<mixed>|string,
+     *      limit?:array{limit?: int|null, offset?: int|null}|int|null,
+     *      offset?:int
+     *  } $data
      * @param mixed $arguments Arguments to QueryBuilder constructor
      */
-    public static function fromArray(array $data, mixed ...$arguments): static
+    public static function fromArray(array $data, mixed ...$arguments): QueryBuilder|QueryBuilderInterface
     {
         $class = $data['class'] ?? static::class;
         $qb = new $class(...$arguments);
+        if (!($qb instanceof QueryBuilder)) {
+            throw new TypeError('Provided class is not instance of QueryBuilder');
+        }
         if (isset($data['type'])) {
             $qb->setType($data['type']);
         }
@@ -191,6 +213,19 @@ class QueryBuilder implements QueryBuilderInterface
         return $qb;
     }
 
+    /**
+     * @return array{
+     *      class: string,
+     *      type: string,
+     *      select: array<mixed>,
+     *      from: array<mixed>,
+     *      columns: string[],
+     *      where: null|array<mixed>,
+     *      orderBy: array<mixed>,
+     *      limit: array{limit?: int|null, offset?: int|null}|null,
+     *      parameters: array<int|non-int-string, mixed>
+     * }
+     */
     public function toArray(): array
     {
         return [
@@ -298,7 +333,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Add many values for update or insert
      *
-     * @param array $values [[col => val], ...]
+     * @param array<string,mixed> $values [[col => val], ...]
      */
     public function values(array $values): static
     {
@@ -309,7 +344,9 @@ class QueryBuilder implements QueryBuilderInterface
     }
 
     /**
-     * Set (alias for values)
+     * Set (self::values() alias)
+     *
+     * @param array<string,mixed> $values
      */
     public function set(array $values): static
     {
@@ -319,6 +356,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Start condition builder or create simple condition
      *
+     * @return ($expression is null ? ConditionBuilder : Condition)
      */
     public function condition(
         string $expression = null,
@@ -375,6 +413,9 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function orderBy(OrderByExpression|string $expr, OrderByType|string $type = 'ASC'): static
     {
+        if ($expr instanceof OrderByExpression) {
+            return $this->addOrderByExpression($expr);
+        }
         return $this->addOrderByExpression($this->createOrderByExpression($expr, $type));
     }
 
@@ -411,6 +452,8 @@ class QueryBuilder implements QueryBuilderInterface
 
     /**
      * Get parameters
+     *
+     * @return array<int|non-int-string, mixed>
      */
     public function getParameters(): array
     {
@@ -459,7 +502,6 @@ class QueryBuilder implements QueryBuilderInterface
                        $this->getSqlPartWhere() .
                        $this->getSqlPartOrderBy() .
                        $this->getSqlPartLimit();
-                break;
             case Type::UPDATE:
                 return $this->type->value .
                        $this->getSqlPartTable() .
@@ -467,24 +509,21 @@ class QueryBuilder implements QueryBuilderInterface
                        $this->getSqlPartWhere() .
                        $this->getSqlPartOrderBy() .
                        $this->getSqlPartLimit();
-                break;
+
             case Type::INSERT:
                 return $this->type->value .
                        $this->getSqlPartInto() .
                        $this->getSqlPartColumns() .
                        $this->getSqlPartValues();
-                return $sql;
             case Type::DELETE:
                 return $this->type->value .
                        $this->getSqlPartFrom() .
                        $this->getSqlPartWhere() .
                        $this->getSqlPartOrderBy() .
                        $this->getSqlPartLimit();
-                return $sql;
-                break;
             default:
                 // @codeCoverageIgnoreStart
-                throw new TypeError('Unknown type: ' . $this->type);
+                throw new TypeError('Unknown type: ' . $this->type->value);
                 // @codeCoverageIgnoreEnd
         }
     }

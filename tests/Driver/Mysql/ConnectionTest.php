@@ -19,7 +19,7 @@ use function React\Promise\resolve;
 #[CoversClass(DriverConnection::class)]
 class ConnectionTest extends TestCase
 {
-    public function testConnection()
+    public function testConnection(): void
     {
         $config = new Config('mysql://localhost/database');
         $connection = new Connection($config);
@@ -29,7 +29,7 @@ class ConnectionTest extends TestCase
         $this->assertInstanceOf(QueryBuilder::class, $connection->query());
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $result = new MysqlResult();
         $result->resultRows = ['row'];
@@ -56,7 +56,7 @@ class ConnectionTest extends TestCase
         $this->assertSame($ret->warningCount, $result->warningCount);
     }
 
-    public function testStream()
+    public function testStream(): void
     {
         $stream = $this->createMock(ResultStream::class);
 
