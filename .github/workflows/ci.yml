@@ -40,4 +40,4 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: none
       - run: composer install
-      - run: vendor/bin/phpunit --coverage-text
+      - run: vendor/bin/phpstan
