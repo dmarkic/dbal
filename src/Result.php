@@ -14,7 +14,7 @@ class Result implements Countable
     /**
      * Constructor
      *
-     * @param array<mixed> $rows
+     * @param array<array<mixed>> $rows Result rows
      */
     public function __construct(
         public readonly array $rows = [],

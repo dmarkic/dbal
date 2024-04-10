@@ -6,6 +6,9 @@ namespace Blrf\Dbal;
 
 use Blrf\Dbal\Query\Condition;
 use Blrf\Dbal\Query\ConditionGroup;
+use Blrf\Dbal\Query\FromExpression;
+use Blrf\Dbal\Query\OrderByExpression;
+use Blrf\Dbal\Query\SelectExpression;
 
 interface QueryBuilderInterface
 {
@@ -16,7 +19,7 @@ interface QueryBuilderInterface
      */
     public static function fromArray(array $data, mixed ...$arguments): self;
 
-    public function select(string ...$exprs): static;
+    public function select(string|SelectExpression ...$exprs): static;
 
     public function update(string|self $from): static;
 
@@ -24,7 +27,9 @@ interface QueryBuilderInterface
 
     public function delete(string|self $from): static;
 
-    public function from(string|self $from, string $as = null): static;
+    public function from(string|FromExpression|self $from, string $as = null): static;
+
+    public function addFromExpression(FromExpression $expr): static;
 
     public function value(string $column, mixed $value): static;
 
@@ -42,6 +47,8 @@ interface QueryBuilderInterface
     public function orWhere(Condition|ConditionGroup|callable $condition): static;
 
     public function orderBy(string $orderBy, string $type = 'ASC'): static;
+
+    public function addOrderByExpression(OrderByExpression $expr): static;
 
     public function limit(?int $offset = null, ?int $limit = null): static;
 

@@ -11,7 +11,7 @@ use is_array;
 use strlen;
 
 /**
- * SELECT [expression]
+ * FROM [expression]
  */
 class FromExpression extends Expression
 {
@@ -46,6 +46,7 @@ class FromExpression extends Expression
      *
      * @note Currently does not support subquery as QueryBuilder
      *       But could probably be done with `(...) AS x` match.
+     *       Very basic regexp.
      */
     public static function fromString(string $from): static
     {

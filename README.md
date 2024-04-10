@@ -4,9 +4,6 @@
 
 Async database abstraction layer for [ReactPHP](https://reactphp.org/).
 
-> **Development version**: This project is currently in development.
-> This is a proof-of-concept for [ReactPHP ORM](https://github.com/dmarkic/orm) that uses this DBAL.
-
 Full example is available in [Bookstore respository](https://github.com/dmarkic/orm-bookstore-example).
 Bookstore example uses [blrf/dbal](https://github.com/dmarkic/dbal), [blrf/orm](https://github.com/dmarkic/orm) and [framework-x](https://github.com/reactphp-framework/framework-x) to showcase current DBAL/ORM development.
 

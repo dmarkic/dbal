@@ -13,6 +13,7 @@ use Blrf\Dbal\Query\SelectExpression;
 use Blrf\Dbal\Query\OrderByExpression;
 use Blrf\Dbal\Query\OrderByType;
 use Blrf\Dbal\Query\Type;
+use Blrf\Dbal\Driver\QueryBuilder as DriverQueryBuilder;
 use TypeError;
 use array_map;
 use is_array;
@@ -125,8 +126,9 @@ class QueryBuilder implements QueryBuilderInterface
      *      offset?:int
      *  } $data
      * @param mixed $arguments Arguments to QueryBuilder constructor
+     * @deprecated Most probably
      */
-    public static function fromArray(array $data, mixed ...$arguments): QueryBuilder|QueryBuilderInterface
+    public static function fromArray(array $data, mixed ...$arguments): QueryBuilder|DriverQueryBuilder
     {
         $class = $data['class'] ?? static::class;
         $qb = new $class(...$arguments);
@@ -250,11 +252,15 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * @see self::createSelectExpression
      */
-    public function select(string ...$exprs): static
+    public function select(string|SelectExpression ...$exprs): static
     {
         $this->setType(Type::SELECT);
         foreach ($exprs as $expr) {
-            $this->addSelectExpression($this->createSelectExpression($expr));
+            if ($expr instanceof SelectExpression) {
+                $this->addSelectExpression($expr);
+            } else {
+                $this->addSelectExpression($this->createSelectExpression($expr));
+            }
         }
         return $this;
     }
@@ -303,8 +309,11 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * @see self::createFromExpression()
      */
-    public function from(string|QueryBuilderInterface $from, string $as = null): static
+    public function from(string|QueryBuilderInterface|FromExpression $from, string $as = null): static
     {
+        if ($from instanceof FromExpression) {
+            return $this->addFromExpression($from);
+        }
         return $this->addFromExpression($this->createFromExpression($from, $as));
     }
 
@@ -633,7 +642,7 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected function createSelectExpression(string $expr): SelectExpression
     {
-        return new SelectExpression($expr);
+        return SelectExpression::fromString($expr);
     }
 
     /**

@@ -13,3 +13,13 @@
 ## main-dev (2024-04-04)
 
 - PHPStan on max
+
+## v1.0.0 (2024-04-10)
+
+- QueryBuilder::fromArray() will probably be deprecated
+- QueryBuilder::select() accepts SelectExpression
+- QueryBuilder::from() accepts FromExpression
+- QueryBuilder::createSelectException() correctly calls SelectExpression::fromString()
+- Update QueryBuilderInterface
+- Fix Result $rows param
+- Test QueryBuilder::select() with SelectExpression

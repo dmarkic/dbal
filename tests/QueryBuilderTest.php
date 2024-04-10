@@ -4,7 +4,9 @@ namespace Blrf\Tests\Dbal;
 
 use Blrf\Dbal\QueryBuilder;
 use Blrf\Dbal\Query\Condition;
+use Blrf\Dbal\Query\FromExpression;
 use Blrf\Dbal\Query\OrderByExpression;
+use Blrf\Dbal\Query\SelectExpression;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(QueryBuilder::class)]
@@ -53,6 +55,15 @@ class QueryBuilderTest extends TestCase
         $nqb = QueryBuilder::fromArray($qb->toArray());
         $this->assertSame($exp, $nqb->getSql());
         $this->assertSame(['f'], $nqb->getParameters());
+    }
+
+    public function testSelectWithExpression(): void
+    {
+        $qb = new QueryBuilder();
+        $qb->select(new SelectExpression('a', 'b'));
+        $qb->from(new FromExpression('c', 'd'));
+        $exp = 'SELECT a AS b FROM c AS d';
+        $this->assertSame($exp, $qb->getSql());
     }
 
     public function testSelectWithAddWhereWithoutPreviousWhere(): void

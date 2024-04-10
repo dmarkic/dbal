@@ -17,6 +17,9 @@ class Condition implements Stringable
         'is null', 'is not null'
     ];
 
+    /**
+     * Value will be null if operator is in noValueOperators
+     */
     public readonly ?string $value;
     /**
      * Create condition from array

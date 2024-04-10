@@ -6,6 +6,7 @@ namespace Blrf\Dbal;
 
 use React\Promise\PromiseInterface;
 use Blrf\Dbal\ResultStream;
+use Blrf\Dbal\Driver\QueryBuilder;
 
 /**
  * Connection interface
@@ -25,7 +26,7 @@ interface Connection
      * Start query builder
      *
      */
-    public function query(): QueryBuilderInterface;
+    public function query(): QueryBuilder;
 
     /**
      * Execute query on connection
