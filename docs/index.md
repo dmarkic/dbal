@@ -8,7 +8,7 @@ Full example project using [Framework X](https://framework-x.org/) is available 
 Use [Composer](https://getcomposer.org/) to install `blrf/dbal` package.
 
 ```
-composer install blrf/dbal:dev-main
+composer install blrf/dbal
 ```
 
 See [Quickstart](quickstart/index.md) for quick example.

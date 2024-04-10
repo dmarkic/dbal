@@ -101,7 +101,7 @@ Please see the [DBAL documentation site](https://blrf.net/dbal/).
 ## Install
 
 ```
-composer require blrf/dbal:dev-main
+composer require blrf/dbal
 ```
 
 ## Tests
