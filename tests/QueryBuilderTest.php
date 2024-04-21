@@ -22,6 +22,7 @@ class QueryBuilderTest extends TestCase
             'type'          => 'SELECT',
             'select'        => [],
             'from'          => [],
+            'join'          => [],
             'columns'       => [],
             'where'         => null,
             'orderBy'       => [],
@@ -36,25 +37,98 @@ class QueryBuilderTest extends TestCase
 
     public function testSelect(): void
     {
-        $exp = 'SELECT a,b FROM c WHERE d = ? ORDER BY e ASC LIMIT 1 OFFSET 2';
+        $exp = 'SELECT a,b FROM c INNER JOIN d AS e ON c.id = e.id WHERE f = ? ORDER BY f ASC LIMIT 1 OFFSET 2';
         $qb = new QueryBuilder();
         $qb
             ->select('a', 'b')
             ->from('c')
+            ->join('d', 'c.id = e.id', 'e')
             ->where(
-                fn($b) => $b->eq('d')
+                fn($b) => $b->eq('f')
             )
-            ->orderBy('e')
+            ->orderBy('f')
             ->limit(1, 2)
-            ->setParameters(['f']);
+            ->setParameters(['h']);
         $this->assertSame(
             $exp,
             $qb->getSql()
         );
-        $this->assertSame(['f'], $qb->getParameters());
+        $this->assertSame(['h'], $qb->getParameters());
         $nqb = QueryBuilder::fromArray($qb->toArray());
         $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['f'], $nqb->getParameters());
+        $this->assertSame(['h'], $nqb->getParameters());
+    }
+
+    public function testSelectLeftJoin(): void
+    {
+        $exp = 'SELECT a,b FROM c LEFT JOIN d AS e ON c.id = e.id WHERE f = ? ORDER BY f ASC LIMIT 1 OFFSET 2';
+        $qb = new QueryBuilder();
+        $qb
+            ->select('a', 'b')
+            ->from('c')
+            ->leftJoin('d', 'c.id = e.id', 'e')
+            ->where(
+                fn($b) => $b->eq('f')
+            )
+            ->orderBy('f')
+            ->limit(1, 2)
+            ->setParameters(['h']);
+        $this->assertSame(
+            $exp,
+            $qb->getSql()
+        );
+        $this->assertSame(['h'], $qb->getParameters());
+        $nqb = QueryBuilder::fromArray($qb->toArray());
+        $this->assertSame($exp, $nqb->getSql());
+        $this->assertSame(['h'], $nqb->getParameters());
+    }
+
+    public function testSelectRightJoinWithoutAlias(): void
+    {
+        $exp = 'SELECT a,b FROM c RIGHT JOIN d ON c.id = d.id WHERE f = ? ORDER BY f ASC LIMIT 1 OFFSET 2';
+        $qb = new QueryBuilder();
+        $qb
+            ->select('a', 'b')
+            ->from('c')
+            ->rightJoin('d', 'c.id = d.id')
+            ->where(
+                fn($b) => $b->eq('f')
+            )
+            ->orderBy('f')
+            ->limit(1, 2)
+            ->setParameters(['h']);
+        $this->assertSame(
+            $exp,
+            $qb->getSql()
+        );
+        $this->assertSame(['h'], $qb->getParameters());
+        $nqb = QueryBuilder::fromArray($qb->toArray());
+        $this->assertSame($exp, $nqb->getSql());
+        $this->assertSame(['h'], $nqb->getParameters());
+    }
+
+    public function testSelectFullJoin(): void
+    {
+        $exp = 'SELECT a,b FROM c FULL JOIN d AS e ON c.id = e.id WHERE f = ? ORDER BY f ASC LIMIT 1 OFFSET 2';
+        $qb = new QueryBuilder();
+        $qb
+            ->select('a', 'b')
+            ->from('c')
+            ->fullJoin('d', 'c.id = e.id', 'e')
+            ->where(
+                fn($b) => $b->eq('f')
+            )
+            ->orderBy('f')
+            ->limit(1, 2)
+            ->setParameters(['h']);
+        $this->assertSame(
+            $exp,
+            $qb->getSql()
+        );
+        $this->assertSame(['h'], $qb->getParameters());
+        $nqb = QueryBuilder::fromArray($qb->toArray());
+        $this->assertSame($exp, $nqb->getSql());
+        $this->assertSame(['h'], $nqb->getParameters());
     }
 
     public function testSelectWithExpression(): void

@@ -50,7 +50,7 @@ class OrderByExpression extends Expression
             throw new ValueError('Expression cannot be empty');
         }
         if (is_string($type)) {
-            $type = empty($type) ? OrderByType::ASC : OrderByType::from($type);
+            $type = empty($type) ? OrderByType::ASC : OrderByType::from(strtoupper($type));
         }
         $this->type = $type;
     }

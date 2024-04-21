@@ -5,6 +5,11 @@ parameters:
         # Condition::fromArray() will return Condition or ConditionGroup based on $data keys
         # don't know how to tell that to phpstan
         - tests/Query/ConditionTest.php
+        #
+        # SQlite driver requires additional extensions and SQLite driver
+        # is rather experimental. So we'll skip it for now.
+        #
+        - src/Driver/Sqlite
 
     paths:
         - src/

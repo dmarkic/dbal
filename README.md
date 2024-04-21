@@ -120,5 +120,4 @@ MIT, see [LICENSE file](LICENSE).
 
 - Write more examples
 - Write having
-- Write joins
 - Schema manager

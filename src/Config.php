@@ -32,7 +32,8 @@ class Config implements Stringable
      * @var array<string,string>
      */
     protected static array $driverMap = [
-        'mysql' => \Blrf\Dbal\Driver\Mysql\Driver::class
+        'mysql'     => \Blrf\Dbal\Driver\Mysql\Driver::class,
+        'sqlite'    => \Blrf\Dbal\Driver\Sqlite\Driver::class
     ];
     /**
      * Dbal driver
@@ -219,7 +220,7 @@ class Config implements Stringable
     {
         $driver = $this->driver;
         if (!class_exists($driver)) {
-            $class = self::$driverMap[$driver];
+            $class = self::$driverMap[$driver] ?? null;
             if ($class === null) {
                 throw new RuntimeException('No such driver: ' . $driver);
             }

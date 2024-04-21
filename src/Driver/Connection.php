@@ -54,6 +54,13 @@ abstract class Connection implements ConnectionInterface
     abstract public function stream(string $sql, array $params = []): ResultStream;
 
     /**
+     * Quit (soft-close) the connection
+     *
+     * @return PromiseInterface<void>
+     */
+    abstract public function quit(): PromiseInterface;
+
+    /**
      * Set underlying native connection
      */
     protected function setNativeConnection(mixed $connection): self

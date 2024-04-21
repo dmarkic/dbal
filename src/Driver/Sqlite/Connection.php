@@ -2,28 +2,34 @@
 
 declare(strict_types=1);
 
-namespace Blrf\Dbal\Driver\Mysql;
+namespace Blrf\Dbal\Driver\Sqlite;
 
 use Blrf\Dbal\Config;
 use Blrf\Dbal\Result;
 use Blrf\Dbal\ResultStream;
 use Blrf\Dbal\Driver\Connection as DriverConnection;
-use React\Mysql\MysqlClient;
-use React\Mysql\MysqlResult;
+use Clue\React\SQLite\Factory;
+use Clue\React\SQLite\DatabaseInterface;
+use Clue\React\SQLite\Result as SqliteResult;
 use React\Promise\PromiseInterface;
 
 use function React\Promise\resolve;
 
 /**
- * React-Php MySQL driver
+ * React-Php Sqlite driver
  *
- * @see https://github.com/friends-of-reactphp/mysql
+ * @see https://github.com/clue/reactphp-sqlite
  */
 class Connection extends DriverConnection
 {
     public function connect(): PromiseInterface
     {
-        return resolve($this->setNativeConnection(new MysqlClient($this->config->getUri())));
+        $factory = new Factory();
+        return $factory->open('/' . $this->config->getDb(), SQLITE3_OPEN_READWRITE)->then(
+            function (DatabaseInterface $db) {
+                return $this->setNativeConnection($db);
+            }
+        );
     }
 
     public function query(): QueryBuilder
@@ -41,12 +47,12 @@ class Connection extends DriverConnection
     {
         // @phpstan-ignore-next-line
         return $this->getNativeConnection()->query($sql, $params)->then(
-            function (MysqlResult $res) {
+            function (SqliteResult $res) {
                 return new Result(
-                    $res->resultRows ?? [],
+                    $res->rows ?? [],
                     $res->insertId,
-                    $res->affectedRows ?? 0,
-                    $res->warningCount ?? 0
+                    $res->changed ?? 0,
+                    0
                 );
             }
         );
@@ -54,13 +60,11 @@ class Connection extends DriverConnection
 
     public function stream(string $sql, array $params = []): ResultStream
     {
-        // @phpstan-ignore-next-line
-        return new ResultStream($this->getNativeConnection()->queryStream($sql, $params));
+        throw new \Exception('Stream not yet supported on sqlite');
     }
 
     public function quit(): PromiseInterface
     {
-        // @phpstan-ignore-next-line
         return $this->getNativeConnection()->quit();
     }
 }

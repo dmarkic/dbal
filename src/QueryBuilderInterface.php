@@ -7,7 +7,10 @@ namespace Blrf\Dbal;
 use Blrf\Dbal\Query\Condition;
 use Blrf\Dbal\Query\ConditionGroup;
 use Blrf\Dbal\Query\FromExpression;
+use Blrf\Dbal\Query\JoinExpression;
+use Blrf\Dbal\Query\JoinType;
 use Blrf\Dbal\Query\OrderByExpression;
+use Blrf\Dbal\Query\OrderByType;
 use Blrf\Dbal\Query\SelectExpression;
 
 interface QueryBuilderInterface
@@ -31,6 +34,14 @@ interface QueryBuilderInterface
 
     public function addFromExpression(FromExpression $expr): static;
 
+    public function join(string $table, string $on, string $alias = null, JoinType $type = JoinType::INNER): static;
+
+    public function leftJoin(string $table, string $on, string $alias = null): static;
+    public function rightJoin(string $table, string $on, string $alias = null): static;
+    public function fullJoin(string $table, string $on, string $alias = null): static;
+
+    public function addJoinExpression(JoinExpression $expr): static;
+
     public function value(string $column, mixed $value): static;
 
     /**
@@ -46,7 +57,7 @@ interface QueryBuilderInterface
 
     public function orWhere(Condition|ConditionGroup|callable $condition): static;
 
-    public function orderBy(string $orderBy, string $type = 'ASC'): static;
+    public function orderBy(string $orderBy, OrderByType|string $type = 'ASC'): static;
 
     public function addOrderByExpression(OrderByExpression $expr): static;
 

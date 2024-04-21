@@ -43,6 +43,13 @@ interface Connection
     public function stream(string $sql, array $params = []): ResultStream;
 
     /**
+     * Quit (soft-close) the connection
+     *
+     * @return PromiseInterface<void>
+     */
+    public function quit(): PromiseInterface;
+
+    /**
      * Get native connection
      */
     public function getNativeConnection(): mixed;

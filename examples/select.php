@@ -18,9 +18,11 @@ $config->create()->then(
                     $cb->eq('title')
                 )
             )
+            ->orderBy('publication_date', 'DESC')
             ->setParameters(['9789998691568', 1, 'Moby Dick'])
             ->limit(3);
-        // sql: SELECT * FROM book WHERE ((isbn13 = ? AND language_id = ?) OR title = ?) LIMIT 3
+        // sql: SELECT * FROM book WHERE ((isbn13 = ? AND language_id = ?) OR title = ?)
+        //      ORDER BY publication_date DESC LIMIT 3
         return $qb->execute();
     }
 )->then(

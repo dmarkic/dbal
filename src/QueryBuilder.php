@@ -10,6 +10,8 @@ use Blrf\Dbal\Query\Condition;
 use Blrf\Dbal\Query\Limit;
 use Blrf\Dbal\Query\FromExpression;
 use Blrf\Dbal\Query\SelectExpression;
+use Blrf\Dbal\Query\JoinExpression;
+use Blrf\Dbal\Query\JoinType;
 use Blrf\Dbal\Query\OrderByExpression;
 use Blrf\Dbal\Query\OrderByType;
 use Blrf\Dbal\Query\Type;
@@ -27,6 +29,8 @@ use implode;
  * Each Driver defines it's own QueryBuilder which may override any method to implement it's own SQL dialect.
  *
  * NOTE: It will not validate queries.
+ *
+ * @phpstan-import-type JoinFromArray from JoinExpression
  */
 class QueryBuilder implements QueryBuilderInterface
 {
@@ -47,6 +51,11 @@ class QueryBuilder implements QueryBuilderInterface
      * @var array<string>
      */
     protected array $columns = [];
+    /**
+     * Joins
+     * @var array<JoinExpression>
+     */
+    protected array $joins = [];
     protected Condition|ConditionGroup|null $where = null;
     /**
      * Order by expressions
@@ -118,6 +127,7 @@ class QueryBuilder implements QueryBuilderInterface
      *      type?: string|Type,
      *      select?: array<mixed>|string,
      *      from?: array<mixed>|string,
+     *      join?: array<JoinFromArray>,
      *      columns?: array<string>,
      *      where?:array<mixed>|null,
      *      values?:array<string,mixed>,
@@ -173,6 +183,17 @@ class QueryBuilder implements QueryBuilderInterface
                 }
             } elseif (is_string($data['from'])) {
                 $qb->addFromExpression(FromExpression::fromString($data['from']));
+            }
+        }
+
+        /**
+         * JOIN expressions
+         */
+        if (isset($data['join']) && is_array($data['join'])) {
+            foreach ($data['join'] as $join) {
+                if (is_array($join)) {
+                    $qb->addJoinExpression(JoinExpression::fromArray($join));
+                }
             }
         }
         $qb->columns = $data['columns'] ?? [];
@@ -235,6 +256,7 @@ class QueryBuilder implements QueryBuilderInterface
             'type'      => $this->type->value,
             'select'    => array_map(fn($expr) => $expr->toArray(), $this->select),
             'from'      => array_map(fn($expr) => $expr->toArray(), $this->from),
+            'join'      => array_map(fn($expr) => $expr->toArray(), $this->joins),
             'columns'   => $this->columns,
             'where'     => $this->where === null ? null : $this->where->toArray(),
             'orderBy'   => array_map(fn($expr) => $expr->toArray(), $this->orderBy),
@@ -362,6 +384,26 @@ class QueryBuilder implements QueryBuilderInterface
         return $this->values($values);
     }
 
+    public function join(string $table, string $on, string $alias = null, JoinType $type = JoinType::INNER): static
+    {
+        return $this->addJoinExpression($this->createJoinExpression($table, $on, $alias, $type));
+    }
+
+    public function leftJoin(string $table, string $on, string $alias = null): static
+    {
+        return $this->addJoinExpression($this->createJoinExpression($table, $on, $alias, JoinType::LEFT));
+    }
+
+    public function rightJoin(string $table, string $on, string $alias = null): static
+    {
+        return $this->addJoinExpression($this->createJoinExpression($table, $on, $alias, JoinType::RIGHT));
+    }
+
+    public function fullJoin(string $table, string $on, string $alias = null): static
+    {
+        return $this->addJoinExpression($this->createJoinExpression($table, $on, $alias, JoinType::FULL));
+    }
+
     /**
      * Start condition builder or create simple condition
      *
@@ -477,6 +519,7 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * - self::getSqlPartSelect()
      * - self::getSqlPartFrom()
+     * - self::getSqlPartJoin()
      * - self::getSqlPartWhere()
      * - self::getSqlPartOrderBy()
      * - self::getSqlPartLimit()
@@ -508,6 +551,7 @@ class QueryBuilder implements QueryBuilderInterface
                 return $this->type->value .
                        $this->getSqlPartSelect() .
                        $this->getSqlPartFrom() .
+                       $this->getSqlPartJoin() .
                        $this->getSqlPartWhere() .
                        $this->getSqlPartOrderBy() .
                        $this->getSqlPartLimit();
@@ -567,6 +611,11 @@ class QueryBuilder implements QueryBuilderInterface
     protected function getSqlPartFrom(): string
     {
         return empty($this->from) ? '' : ' FROM ' . implode(', ', $this->from);
+    }
+
+    protected function getSqlPartJoin(): string
+    {
+        return empty($this->joins) ? '' : ' ' . implode(' ', array_map(fn($join) => (string)$join, $this->joins));
     }
 
     /**
@@ -667,6 +716,21 @@ class QueryBuilder implements QueryBuilderInterface
     public function addFromExpression(FromExpression $expr): static
     {
         $this->from[] = $expr;
+        return $this;
+    }
+
+    protected function createJoinExpression(
+        string $table,
+        string $on,
+        string $alias = null,
+        JoinType $type = JoinType::INNER
+    ): JoinExpression {
+        return new JoinExpression($type, $table, $on, $alias);
+    }
+
+    public function addJoinExpression(JoinExpression $expr): static
+    {
+        $this->joins[] = $expr;
         return $this;
     }
 
