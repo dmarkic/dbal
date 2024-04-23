@@ -5,6 +5,7 @@ namespace Blrf\Tests\Dbal;
 use Blrf\Dbal\QueryBuilder;
 use Blrf\Dbal\Query\Condition;
 use Blrf\Dbal\Query\FromExpression;
+use Blrf\Dbal\Query\JoinExpression;
 use Blrf\Dbal\Query\OrderByExpression;
 use Blrf\Dbal\Query\SelectExpression;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -18,7 +19,6 @@ class QueryBuilderTest extends TestCase
         $this->assertSame('SELECT ', $qb->getSql());
         $a = $qb->toArray();
         $exp = [
-            'class'         => QueryBuilder::class,
             'type'          => 'SELECT',
             'select'        => [],
             'from'          => [],
@@ -31,13 +31,62 @@ class QueryBuilderTest extends TestCase
         ];
         $this->assertSame($exp, $a);
 
-        $new = QueryBuilder::fromArray($a);
-        $this->assertEquals($qb, $new);
+        $qb->fromArray($a);
+        $this->assertEquals($exp, $qb->toArray());
     }
 
     public function testSelect(): void
     {
-        $exp = 'SELECT a,b FROM c INNER JOIN d AS e ON c.id = e.id WHERE f = ? ORDER BY f ASC LIMIT 1 OFFSET 2';
+        $exp = 'SELECT a,b FROM c INNER JOIN d AS e ON c.id = e.id WHERE f = ? ORDER BY f ASC, x DESC LIMIT 1 OFFSET 2';
+
+        $expArray = [
+            'type'  => 'SELECT',
+            'select' => [
+                [
+                    'expression'    => 'a',
+                    'alias'         => null
+                ],
+                [
+                    'expression'    => 'b',
+                    'alias'         => null
+                ]
+            ],
+            'from' => [
+                [
+                    'expression'    => 'c',
+                    'alias'         => null
+                ]
+            ],
+            'join'  => [
+                [
+                    'type'  => 'INNER',
+                    'table' => 'd',
+                    'on'    => 'c.id = e.id',
+                    'alias' => 'e'
+                ]
+            ],
+            'columns'   => [],
+            'where'     => [
+                'expression'    => 'f',
+                'operator'      => '=',
+                'value'         => '?'
+            ],
+            'orderBy'   => [
+                [
+                    'expression'    => 'f',
+                    'type'          => 'ASC'
+                ],
+                [
+                    'expression'    => 'x',
+                    'type'          => 'DESC'
+                ]
+            ],
+            'limit' => [
+                'limit'     => 1,
+                'offset'    => 2
+            ],
+            'parameters'    => ['h']
+        ];
         $qb = new QueryBuilder();
         $qb
             ->select('a', 'b')
@@ -47,16 +96,20 @@ class QueryBuilderTest extends TestCase
                 fn($b) => $b->eq('f')
             )
             ->orderBy('f')
+            ->orderBy(new OrderByExpression('x', 'DESC'))
             ->limit(1, 2)
             ->setParameters(['h']);
         $this->assertSame(
             $exp,
             $qb->getSql()
         );
+        $a = $qb->toArray();
+        $this->assertSame($expArray, $a);
         $this->assertSame(['h'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['h'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['h'], $qb->getParameters());
+        $this->assertSame($expArray, $qb->toArray());
     }
 
     public function testSelectLeftJoin(): void
@@ -78,9 +131,9 @@ class QueryBuilderTest extends TestCase
             $qb->getSql()
         );
         $this->assertSame(['h'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['h'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['h'], $qb->getParameters());
     }
 
     public function testSelectRightJoinWithoutAlias(): void
@@ -102,9 +155,9 @@ class QueryBuilderTest extends TestCase
             $qb->getSql()
         );
         $this->assertSame(['h'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['h'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['h'], $qb->getParameters());
     }
 
     public function testSelectFullJoin(): void
@@ -126,9 +179,9 @@ class QueryBuilderTest extends TestCase
             $qb->getSql()
         );
         $this->assertSame(['h'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['h'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['h'], $qb->getParameters());
     }
 
     public function testSelectWithExpression(): void
@@ -158,9 +211,9 @@ class QueryBuilderTest extends TestCase
             $qb->getSql()
         );
         $this->assertSame(['f'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['f'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['f'], $qb->getParameters());
     }
 
     public function testSelectWithAddWhereWithPreviousWhere(): void
@@ -183,9 +236,9 @@ class QueryBuilderTest extends TestCase
             $qb->getSql()
         );
         $this->assertSame(['f', 'h'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['f', 'h'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['f', 'h'], $qb->getParameters());
     }
 
     public function testSelectWithOrWhereWithoutPreviousWhere(): void
@@ -206,9 +259,9 @@ class QueryBuilderTest extends TestCase
             $qb->getSql()
         );
         $this->assertSame(['f'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['f'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['f'], $qb->getParameters());
     }
 
     public function testSelectWithOrWhereWithPreviousWhere(): void
@@ -231,9 +284,9 @@ class QueryBuilderTest extends TestCase
             $qb->getSql()
         );
         $this->assertSame(['f', 'h'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['f', 'h'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['f', 'h'], $qb->getParameters());
     }
 
     public function testUpdate(): void
@@ -252,9 +305,9 @@ class QueryBuilderTest extends TestCase
             ->limit(1);
         $this->assertSame($exp, $qb->getSql());
         $this->assertSame(['c', 'e', 'g'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['c', 'e', 'g'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['c', 'e', 'g'], $qb->getParameters());
     }
 
     public function testInsert(): void
@@ -269,9 +322,26 @@ class QueryBuilderTest extends TestCase
             ]);
         $this->assertSame($exp, $qb->getSql());
         $this->assertSame(['c', 'f'], $qb->getParameters());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
-        $this->assertSame(['c', 'f'], $nqb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['c', 'f'], $qb->getParameters());
+    }
+
+    public function testInsertWithFromExpression(): void
+    {
+        $exp = 'INSERT INTO a (b, d) VALUES(?, ?)';
+        $qb = new QueryBuilder();
+        $qb
+            ->insert(new FromExpression('a'))
+            ->values([
+                'b' => 'c',
+                'd' => 'f'
+            ]);
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['c', 'f'], $qb->getParameters());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
+        $this->assertSame(['c', 'f'], $qb->getParameters());
     }
 
     public function testDelete(): void
@@ -290,101 +360,68 @@ class QueryBuilderTest extends TestCase
             ->orderBy('f', 'DESC')
             ->limit(5);
         $this->assertSame($exp, $qb->getSql());
-        $nqb = QueryBuilder::fromArray($qb->toArray());
-        $this->assertSame($exp, $nqb->getSql());
+        $qb = $qb->fromArray($qb->toArray());
+        $this->assertSame($exp, $qb->getSql());
     }
 
-    public function testFromArrayClassNotQueryBuilder(): void
+    public function testFromArrayWithoutType(): void
     {
-        $this->expectException(\TypeError::class);
-        $data = [
-            'class' => \StdClass::class
-        ];
-        QueryBuilder::fromArray($data);
-    }
-
-    public function testFromArraySelectIsString(): void
-    {
+        $this->expectException(\ValueError::class);
         $data = [
             'select'    => '1'
         ];
-        $qb = QueryBuilder::fromArray($data);
-        $exp = 'SELECT 1';
-        $this->assertSame($exp, $qb->getSql());
+        // @phpstan-ignore-next-line
+        $qb = (new QueryBuilder())->fromArray($data);
     }
 
-    public function testFromArraySelectIsArrayWithString(): void
+    public function testFromArrayFromIsQueryBuilderArray(): void
     {
         $data = [
-            'select'    => ['1']
+            'type'  => 'SELECT',
+            'from'  => [
+                [
+                    'expression'    => [
+                        'type'  => 'SELECT',
+                        'select'    => [
+                            ['expression'   => '2']
+                        ]
+                    ],
+                    'alias' => 'alias'
+                ]
+            ]
         ];
-        $qb = QueryBuilder::fromArray($data);
-        $exp = 'SELECT 1';
-        $this->assertSame($exp, $qb->getSql());
+        $qb = (new QueryBuilder())->fromArray($data);
+        $this->assertSame('SELECT  FROM (SELECT 2) AS alias', $qb->getSql());
     }
 
-    public function testFromArrayFromIsString(): void
+    public function testFromArrayWithExpressionObjects(): void
     {
+        $exp = 'SELECT 1 AS number FROM table AS alias INNER JOIN table AS jalias ON on ' .
+               'ORDER BY number DESC LIMIT 1 OFFSET 2';
         $data = [
-            'select'    => '1',
-            'from'      => 'table'
-        ];
-        $qb = QueryBuilder::fromArray($data);
-        $exp = 'SELECT 1 FROM table';
-        $this->assertSame($exp, $qb->getSql());
-    }
-
-    public function testFromArrayFromIsArrayWithString(): void
-    {
-        $data = [
-            'select'    => '1',
-            'from'      => ['table']
-        ];
-        $qb = QueryBuilder::fromArray($data);
-        $exp = 'SELECT 1 FROM table';
-        $this->assertSame($exp, $qb->getSql());
-    }
-
-    public function testFromArrayOrderByIsString(): void
-    {
-        $data = [
-            'select'    => '1',
-            'from'      => 'table',
-            'orderBy'   => 'column ASC'
-        ];
-        $qb = QueryBuilder::fromArray($data);
-        $exp = 'SELECT 1 FROM table ORDER BY column ASC';
-        $this->assertSame($exp, $qb->getSql());
-    }
-
-    public function testFromArrayOrderByIsArrayWithString(): void
-    {
-        $data = [
-            'select'    => '1',
-            'from'      => 'table',
-            'orderBy'   => ['column ASC']
-        ];
-        $qb = QueryBuilder::fromArray($data);
-        $exp = 'SELECT 1 FROM table ORDER BY column ASC';
-        $this->assertSame($exp, $qb->getSql());
-    }
-
-    public function testFromArrayLimitDirectlyInData(): void
-    {
-        $data = [
-            'select'    => '1',
+            'type'  => 'SELECT',
+            'select' => [new SelectExpression('1', 'number')],
+            'from'      => [new FromExpression('table', 'alias')],
+            'join'      => [new JoinExpression('INNER', 'table', 'on', 'jalias')],
+            'orderBy'   => [new OrderByExpression('number', 'DESC')],
             'limit'     => 1,
             'offset'    => 2
         ];
-        $qb = QueryBuilder::fromArray($data);
-        $exp = 'SELECT 1 LIMIT 1 OFFSET 2';
+        $qb = (new QueryBuilder())->fromArray($data);
         $this->assertSame($exp, $qb->getSql());
     }
 
-    public function testOrderByWithOrderByExpression(): void
+    public function testQuoteIdentifierSingle(): void
     {
+        $id = 'foobar';
         $qb = new QueryBuilder();
-        $qb->orderBy(new OrderByExpression('expr', 'ASC'));
-        $this->assertSame('SELECT  ORDER BY expr ASC', $qb->getSql());
+        $this->assertSame('`foobar`', $qb->quoteIdentifier($id));
+    }
+
+    public function testQuoteIdentifiers(): void
+    {
+        $id = 'foo.bar.id';
+        $qb = new QueryBuilder();
+        $this->assertSame('`foo`.`bar`.`id`', $qb->quoteIdentifier($id));
     }
 }

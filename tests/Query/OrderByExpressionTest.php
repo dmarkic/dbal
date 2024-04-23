@@ -15,27 +15,14 @@ class OrderByExpressionTest extends TestCase
         new OrderByExpression('');
     }
 
-    public function testFromArrayAndToArray(): void
+    public function testWithStringType(): void
     {
-        $a = [
-            'expression'    => 'MyExpression',
-            'type'          => 'DESC'
+        $o = new OrderByExpression('expr', 'asc');
+        $this->assertSame('expr ASC', (string)$o);
+        $exp = [
+            'expression'    => 'expr',
+            'type'          => 'ASC'
         ];
-        $e = OrderByExpression::fromArray($a);
-        $this->assertSame($a, $e->toArray());
-    }
-
-    public function testFromStringAndToStringWithType(): void
-    {
-        $s = 'MyExpression DESC';
-        $e = OrderByExpression::fromString($s);
-        $this->assertSame($s, (string)$e);
-    }
-
-    public function testFromStringAndToStringWithoutType(): void
-    {
-        $s = 'MyExpression';
-        $e = OrderByExpression::fromString($s);
-        $this->assertSame($s . ' ASC', (string)$e);
+        $this->assertSame($exp, $o->toArray());
     }
 }

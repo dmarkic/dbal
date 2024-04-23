@@ -28,5 +28,9 @@ $config->create()->then(
 )->then(
     function (Blrf\Dbal\Result $result) {
         print_r($result->rows);
+        // or
+        foreach ($result as $row) {
+            print_r($row);
+        }
     }
 );

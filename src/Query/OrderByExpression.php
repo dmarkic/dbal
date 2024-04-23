@@ -10,37 +10,20 @@ use strtoupper;
 
 /**
  * ORDER BY [expression]
+ *
+ * @phpstan-type OrderByFromArray array{
+ *      expression: string,
+ *      type?: string|OrderByType
+ * }
+ *
+ * @phpstan-type OrderByToArray array{
+ *      expression: string,
+ *      type: string
+ * }
  */
 class OrderByExpression extends Expression
 {
     public readonly OrderByType $type;
-    /**
-     * Create order by expression from array
-     *
-     * Data keys:
-     *
-     * - expression: string
-     * - type: ?string (OrderByType)
-     *
-     * @param array{expression?: string, type?:OrderByType|string} $data
-     */
-    public static function fromArray(array $data): static
-    {
-        return new static($data['expression'] ?? '', $data['type'] ?? OrderByType::ASC);
-    }
-
-    /**
-     * Create select expression from string
-     *
-     * @note regexp is very basic
-     */
-    public static function fromString(string $string): static
-    {
-        preg_match('/([^\s]+)\s?(ASC|DESC)?/ui', $string, $matches);
-        $expression = $matches[1];
-        $type = strtoupper($matches[2] ?? 'ASC');
-        return new static($expression, $type);
-    }
 
     final public function __construct(
         public readonly string $expression,
@@ -60,9 +43,12 @@ class OrderByExpression extends Expression
         return $this->expression . ' ' . $this->type->value;
     }
 
-    /** @return array{expression: string, type: string} */
+    /** @return OrderByToArray */
     public function toArray(): array
     {
-        return ['expression' => $this->expression, 'type' => $this->type->value];
+        return [
+            'expression' => $this->expression,
+            'type' => $this->type->value
+        ];
     }
 }

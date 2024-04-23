@@ -12,49 +12,21 @@ use preg_match;
  *
  * MySQL: You can not really use offset without limit. If you need it, set offset and limit to PHP_INT_MAX.
  * PostgreSql: Limit may be ALL
+ *
+ * @phpstan-type LimitFromArray array{
+ *      limit?: int|null,
+ *      offset?: int|null
+ * }
+ *
+ * @phpstan-type LimitToArray array{
+ *      limit: int|null,
+ *      offset: int|null
+ * }
  */
 class Limit extends Expression
 {
     protected ?int $limit = null;
     protected ?int $offset = null;
-
-    /**
-     * Limit from array
-     *
-     * Data keys:
-     *
-     * - limit
-     * - offset
-     *
-     * @param array{limit?:int|null, offset?:int|null} $data
-     */
-    public static function fromArray(array $data): static
-    {
-        $limit = isset($data['limit']) ? (int)$data['limit'] : null;
-        $offset = isset($data['offset']) ? (int)$data['offset'] : null;
-        return new static($limit, $offset);
-    }
-
-    /**
-     * Limit from string
-     *
-     * Currently supports string:
-     *
-     * - LIMIT l OFFSET o
-     */
-    public static function fromString(string $data): static
-    {
-        $limit = null;
-        $offset = null;
-        preg_match('/LIMIT\s+(\d+)(\s+OFFSET\s+(\d+))?/i', $data, $matches);
-        if (isset($matches[1])) {
-            $limit = (int)$matches[1];
-        }
-        if (isset($matches[3])) {
-            $offset = (int)$matches[3];
-        }
-        return new static($limit, $offset);
-    }
 
     /**
      * Construct new Limit clause
@@ -87,7 +59,7 @@ class Limit extends Expression
         return $ret;
     }
 
-    /** @return array{limit: int|null, offset: int|null} */
+    /** @return LimitToArray */
     public function toArray(): array
     {
         return ['limit' => $this->limit, 'offset' => $this->offset];

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.2 (2024-04-23)
+
+- QueryBuilder::quoteIdentifier()
+- QueryBuilder fromArray is not longer static
+- QueryBuilder\Query - removed static fromArray methods (except in Conditions)
+- Updated docs
+
 ## v1.0.1 (2024-04-21)
 
 - QueryBuilder::join() added

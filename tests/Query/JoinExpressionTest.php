@@ -28,39 +28,27 @@ class JoinExpressionTest extends TestCase
         $this->assertSame($expr->type, JoinType::INNER);
     }
 
-    public function testFromStringNotImplemented(): void
+    public function testToStringWithoutAlias(): void
     {
-        $this->expectException(\Exception::class);
-        $exp = JoinExpression::fromString('');
+        $expr = new JoinExpression(JoinType::LEFT, 'table', 'on');
+        $this->assertSame('LEFT JOIN table ON on', $expr->__toString());
     }
 
-    public function testFromArrayAndToArrayAndToString(): void
+    public function testToStringWithAlias(): void
     {
-        $expr = JoinExpression::fromArray([
-            'type'  => JoinType::FULL,
-            'table' => 'table',
-            'on'    => 'on',
-            'alias' => 'alias'
-        ]);
-        $this->assertSame(JoinType::FULL, $expr->type);
-        $this->assertSame('table', $expr->table);
-        $this->assertSame('on', $expr->on);
-        $this->assertSame('alias', $expr->alias);
+        $expr = new JoinExpression(JoinType::LEFT, 'table', 'on', 'alias');
+        $this->assertSame('LEFT JOIN table AS alias ON on', $expr->__toString());
+    }
 
+    public function testToArray(): void
+    {
+        $expr = new JoinExpression(JoinType::FULL, 'table', 'on', 'alias');
         $exp = [
             'type'  => JoinType::FULL->value,
             'table' => 'table',
             'on'    => 'on',
             'alias' => 'alias'
         ];
-
         $this->assertSame($exp, $expr->toArray());
-        $this->assertSame('FULL JOIN table AS alias ON on', $expr->__toString());
-    }
-
-    public function testToStringWithoutAlias():void
-    {
-        $expr = new JoinExpression(JoinType::LEFT, 'table', 'on');
-        $this->assertSame('LEFT JOIN table ON on', $expr->__toString());
     }
 }

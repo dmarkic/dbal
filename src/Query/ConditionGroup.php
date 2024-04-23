@@ -11,6 +11,10 @@ use ValueError;
 
 /**
  * Group of conditions
+ *
+ * @phpstan-type ConditionGroupToArray non-empty-array<'AND'|'OR', array<array>>
+ *
+ * @phpstan-type ConditionGroupFromArray array{'OR': array<array<mixed>>}|array{'AND': array<array<mixed>>}
  */
 class ConditionGroup implements Stringable
 {
@@ -26,7 +30,7 @@ class ConditionGroup implements Stringable
      *   'type' => [ condition, ... ]
      * ]
      *
-     * @param array{'OR': array<array<mixed>>}|array{'AND': array<array<mixed>>} $data
+     * @param ConditionGroupFromArray $data
      */
     public static function fromArray(array $data): static
     {
@@ -67,7 +71,7 @@ class ConditionGroup implements Stringable
      * ]
      * ```
      *
-     * @return non-empty-array<'AND'|'OR', array<array>>
+     * @return ConditionGroupToArray
      */
     public function toArray(): array
     {

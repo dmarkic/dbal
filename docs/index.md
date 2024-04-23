@@ -20,3 +20,7 @@ Currently these drivers are directly supported:
 - MySql: using [ReactPHP Mysql](https://github.com/friends-of-reactphp/mysql/)
 
 See [Config](api/config.md) on how to use the drivers.
+
+## Query builder
+
+See [Query builder](api/querybuilder.md) on how to construct and run queries.

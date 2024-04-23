@@ -9,6 +9,18 @@ use ValueError;
 
 /**
  * Single condition for WHERE or HAVING
+ *
+ * @phpstan-type ConditionToArray array{
+ *      expression: string,
+ *      operator: string,
+ *      value: mixed
+ * }
+ *
+ * @phpstan-type ConditionFromArray array{
+ *      expression: string,
+ *      operator: string,
+ *      value: mixed
+ * }
  */
 class Condition implements Stringable
 {
@@ -17,10 +29,6 @@ class Condition implements Stringable
         'is null', 'is not null'
     ];
 
-    /**
-     * Value will be null if operator is in noValueOperators
-     */
-    public readonly ?string $value;
     /**
      * Create condition from array
      *
@@ -71,6 +79,11 @@ class Condition implements Stringable
         return new static($expression, $operator, $value);
     }
 
+    /**
+     * Value will be null if operator is in noValueOperators
+     */
+    public readonly ?string $value;
+
     final public function __construct(
         public readonly string $expression,
         public readonly string $operator = '=',
@@ -87,7 +100,7 @@ class Condition implements Stringable
         return $this->expression . ' ' . $this->operator . ($this->value === null ? '' : ' ' . $this->value);
     }
 
-    /** @return array{expression:string, operator:string, value:string|null} */
+    /** @return ConditionToArray */
     public function toArray(): array
     {
         return [

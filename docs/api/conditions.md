@@ -80,6 +80,8 @@ There are many predefined operators (methods) available:
 - gte(): Greater than or equal `>=`
 - isNull(): `IS NULL`
 - isNotNull(): `IS NOT NULL`
+- like(): `LIKE`
+- notLike(): `NOT LIKE`
 
 !!! note
     More should be added (LIKE, NOT LIKE, IN, NOT IN, ...)

@@ -7,33 +7,25 @@ namespace Blrf\Dbal\Query;
 use ValueError;
 
 /**
+ * JOIN [expression]
+ *
  * @phpstan-type JoinFromArray array{
  *      table: string,
  *      on: string,
  *      alias?: string|null,
  *      type?: string|JoinType
  * }
+ *
+ * @phpstan-type JoinToArray array{
+ *      table: string,
+ *      on: string,
+ *      alias: string|null,
+ *      type: string
+ * }
  */
 class JoinExpression extends Expression
 {
     public readonly JoinType $type;
-
-    /**
-     * @param JoinFromArray $data
-     */
-    public static function fromArray(array $data): static
-    {
-        $table = $data['table'] ?? '';
-        $on = $data['on'] ?? '';
-        $alias = $data['alias'] ?? null;
-        $type = $data['type'] ?? JoinType::INNER;
-        return new static($type, $table, $on, $alias);
-    }
-
-    public static function fromString(string $join): static
-    {
-        throw new \Exception('Not implemented');
-    }
 
     final public function __construct(
         JoinType|string $type,
@@ -60,13 +52,7 @@ class JoinExpression extends Expression
                ' ON ' . $this->on;
     }
 
-    /** @return array{
-     *      table: string,
-     *      on: string,
-     *      alias: string|null,
-     *      type: string
-     * }
-     */
+    /** @return JoinToArray **/
     public function toArray(): array
     {
         return [

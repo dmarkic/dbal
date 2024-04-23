@@ -12,55 +12,19 @@ use strlen;
 
 /**
  * FROM [expression]
+ *
+ * @phpstan-type FromFromArray array{
+ *      expression: string|array<mixed>,
+ *      alias?: string|null
+ * }
+ *
+ * @phpstan-type FromToArray array{
+ *      expression: string|array<mixed>,
+ *      alias: string|null
+ * }
  */
 class FromExpression extends Expression
 {
-    /**
-     * Create FromExpression from array
-     *
-     * Data keys:
-     *
-     * - expression
-     *   - string
-     *   - array with key 'class' will call class::fromArray() which is expected to be a QueryBuilderInterface
-     * - alias
-     *
-     * @param array{expression?:string|array<mixed>, alias?:string} $data
-     */
-    public static function fromArray(array $data): static
-    {
-        $expression = $data['expression'] ?? '';
-        /**
-         * Is it a subquery?
-         */
-        if (is_array($expression) && isset($expression['class'])) {
-            $class = $expression['class'];
-            $expression = $class::fromArray($expression);
-        }
-        $alias = $data['alias'] ?? null;
-        return new static($expression, $alias);
-    }
-
-    /**
-     * Create from expression from string
-     *
-     * @note Currently does not support subquery as QueryBuilder
-     *       But could probably be done with `(...) AS x` match.
-     *       Very basic regexp.
-     */
-    public static function fromString(string $from): static
-    {
-        $expression = '';
-        $alias = null;
-        if (preg_match('/(.*)( AS )+(.*)/iu', $from, $matches)) {
-            $expression = $matches[1];
-            $alias = $matches[3];
-        } else {
-            $expression = $from;
-        }
-        return new static($expression, $alias);
-    }
-
     /**
      * From expression
      *
@@ -73,6 +37,9 @@ class FromExpression extends Expression
         if (is_string($expression) && strlen($expression) == 0) {
             throw new ValueError('Expression cannot be empty');
         }
+        if ($expression instanceof QueryBuilderInterface && empty($alias)) {
+            throw new ValueError('Expression is QueryBuilder with empty alias');
+        }
     }
 
     public function __toString(): string
@@ -83,7 +50,7 @@ class FromExpression extends Expression
         return $this->expression . ($this->alias === null ? '' : ' AS ' . $this->alias);
     }
 
-    /** @return array{expression:string|array<mixed>, alias: string|null} */
+    /** @return FromToArray */
     public function toArray(): array
     {
         return [

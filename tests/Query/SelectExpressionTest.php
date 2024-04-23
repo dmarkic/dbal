@@ -15,27 +15,25 @@ class SelectExpressionTest extends TestCase
         new SelectExpression('');
     }
 
-    public function testFromArrayAndToArray(): void
+    public function testSelectWithoutAlias(): void
     {
-        $a = [
-            'expression'    => 'MyExpression',
-            'alias'         => 'MyAlias'
+        $s = new SelectExpression('expr');
+        $this->assertSame('expr', (string)$s);
+        $exp = [
+            'expression'    => 'expr',
+            'alias'         => null
         ];
-        $e = SelectExpression::fromArray($a);
-        $this->assertSame($a, $e->toArray());
+        $this->assertSame($exp, $s->toArray());
     }
 
-    public function testFromStringAndToStringWithAlias(): void
+    public function testSelectWithAlias(): void
     {
-        $s = 'MyExpression AS MyAlias';
-        $e = SelectExpression::fromString($s);
-        $this->assertSame($s, (string)$e);
-    }
-
-    public function testFromStringAndToStringWithoutAlias(): void
-    {
-        $s = '1+1';
-        $e = SelectExpression::fromString($s);
-        $this->assertSame($s, (string)$e);
+        $s = new SelectExpression('expr', 'alias');
+        $this->assertSame('expr AS alias', (string)$s);
+        $exp = [
+            'expression'    => 'expr',
+            'alias'         => 'alias'
+        ];
+        $this->assertSame($exp, $s->toArray());
     }
 }

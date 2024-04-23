@@ -15,24 +15,14 @@ class LimitTest extends TestCase
         new Limit(null);
     }
 
-    public function testFromArrayAndToArray(): void
+    public function testWithLimitAndOffset(): void
     {
-        $a = ['limit' => 10, 'offset' => 11];
-        $l = Limit::fromArray($a);
-        $this->assertSame($a, $l->toArray());
-    }
-
-    public function testFromStringAndToStringWithOffset(): void
-    {
-        $s = 'LIMIT 10 OFFSET 20';
-        $l = Limit::fromString($s);
-        $this->assertSame($s, (string)$l);
-    }
-
-    public function testFromStringAndToStringWithoutOffset(): void
-    {
-        $s = 'LIMIT 10';
-        $l = Limit::fromString($s);
-        $this->assertSame($s, (string)$l);
+        $l = new Limit(1, 2);
+        $this->assertSame('LIMIT 1 OFFSET 2', (string)$l);
+        $exp = [
+            'limit'     => 1,
+            'offset'    => 2
+        ];
+        $this->assertSame($exp, $l->toArray());
     }
 }

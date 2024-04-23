@@ -16,40 +16,57 @@ class FromExpressionTest extends TestCase
         new FromExpression('');
     }
 
-    public function testFromArrayAndToArraySimple(): void
+    public function testConstructWithQueryBuilderAndEmptyAlias(): void
     {
-        $a = ['expression' => 'MyExpression', 'alias' => 'MyAlias'];
-        $e = FromExpression::fromArray($a);
-        $this->assertSame($a, $e->toArray());
+        $this->expectException(\ValueError::class);
+        new FromExpression(new QueryBuilder());
     }
 
-    public function testFromArrayAndToArraySubquery(): void
+    public function testToStringWithoutAlias(): void
     {
-        $a = [
-            'expression'    => (new QueryBuilder())->toArray(),
-            'alias'         => 'myAlias'
-        ];
-        $e = FromExpression::fromArray($a);
-        $this->assertSame($a, $e->toArray());
+        $e = new FromExpression('from');
+        $this->assertSame('from', (string)$e);
     }
 
-    public function testFromStringAndToStringWithAlias(): void
+    public function testToStringWithAlias(): void
     {
-        $s = 'from AS alias';
-        $e = FromExpression::fromString($s);
-        $this->assertSame($s, (string)$e);
-    }
-
-    public function testFromStringAndToStringWithoutAlias(): void
-    {
-        $s = 'from';
-        $e = FromExpression::fromString($s);
-        $this->assertSame($s, (string)$e);
+        $e = new FromExpression('from', 'alias');
+        $this->assertSame('from AS alias', (string)$e);
     }
 
     public function testToStringWithSubquery(): void
     {
         $e = new FromExpression(new QueryBuilder(), 't1');
         $this->assertSame('(SELECT ) AS t1', (string)$e);
+    }
+
+    public function testToArray(): void
+    {
+        $e = new FromExpression('from', 'alias');
+        $exp = [
+            'expression'    => 'from',
+            'alias'         => 'alias'
+        ];
+        $this->assertSame($exp, $e->toArray());
+    }
+
+    public function testToArrayWithQueryBuilder(): void
+    {
+        $e = new FromExpression(new QueryBuilder(), 'alias');
+        $exp = [
+            'expression'    => [
+                'type'          => 'SELECT',
+                'select'        => [],
+                'from'          => [],
+                'join'          => [],
+                'columns'       => [],
+                'where'         => null,
+                'orderBy'       => [],
+                'limit'         => null,
+                'parameters'    =>  [],
+            ],
+            'alias'         => 'alias'
+        ];
+        $this->assertSame($exp, $e->toArray());
     }
 }

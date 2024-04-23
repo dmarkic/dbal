@@ -17,6 +17,7 @@ use Blrf\Dbal\Query\OrderByType;
 use Blrf\Dbal\Query\Type;
 use Blrf\Dbal\Driver\QueryBuilder as DriverQueryBuilder;
 use TypeError;
+use ValueError;
 use array_map;
 use is_array;
 use is_string;
@@ -30,7 +31,10 @@ use implode;
  *
  * NOTE: It will not validate queries.
  *
- * @phpstan-import-type JoinFromArray from JoinExpression
+ * @phpstan-import-type QueryBuilderFromArray from QueryBuilderInterface
+ * @phpstan-import-type QueryBuilderToArray from QueryBuilderInterface
+ *
+ * @phpstan-import-type SelectFromArray from SelectExpression
  */
 class QueryBuilder implements QueryBuilderInterface
 {
@@ -55,212 +59,164 @@ class QueryBuilder implements QueryBuilderInterface
      * Joins
      * @var array<JoinExpression>
      */
-    protected array $joins = [];
+    protected array $join = [];
+    /**
+     * Where conditions
+     */
     protected Condition|ConditionGroup|null $where = null;
     /**
      * Order by expressions
      * @var array<OrderByExpression>
      */
     protected array $orderBy = [];
+    /**
+     * Limit
+     */
     protected ?Limit $limit = null;
     /**
      * Parameters
      * @var array<int|non-int-string, mixed>
      */
     protected array $parameters = [];
+    /**
+     * Quote char
+     *
+     * When you want to quote identifier use self::quoteIdentifier() method.
+     * @note DBAL will not quote identifiers
+     */
+    protected string $quoteChar = '`';
 
     /**
-     * Create query builder from array
+     * Build query from array
      *
-     * # Array keys
-     *
-     * ## `class` string
-     *
-     * Which class to use to construct query builder (defaults to static class)
-     *
-     * ## `type` string
-     *
-     * Type of query (default: SELECT)
-     *
-     * ## `select` string|array
-     *
-     * Select expressions
-     *
-     * String: EXPRESSION AS ALIAS, EXPRESSION AS ALIAS, ...
-     * Array: [['expression' => 'EXPRESSION', 'alias' => 'ALIAS'], ...]
-     *
-     * ## `from` string|array|QueryBuilder
-     *
-     * From expressions
-     *
-     * String: NA; TBD!
-     * Array: [['expression' => 'EXPRESSION'], 'alias' => 'ALIAS']
-     * Array with subquery: [['expression' => QueryBuilder::toArray(), 'alias' => 'ALIAS']]
-     *
-     * ## `columns` array
-     *
-     * List of `INSERT` or `UPDATE` columns
-     *
-     * ## `where` Condition|ConditionGroup
-     *
-     * Simple condition: ['ex', 'op', 'value'] or
-     * ['expression' => 'ex', 'operator' => 'op', 'value' => 'value']
-     *
-     * Group condition: ['TYPE' => [... conditions ... ] ]
-     *
-     *
-     * ## `orderBy` array
-     *
-     * List of `ORDER BY` columns
-     *
-     * ## `limit` array
-     *
-     * String: 'LIMIT l OFFSET o'
-     * Array: ['limit' => limit, 'offset' => offset] or $data['limit'], $data['offset']
-     *
-     * ## `parameters` array
-     *
-     * List of parameters
-     *
-     * @param array{
-     *      class?: string,
-     *      type?: string|Type,
-     *      select?: array<mixed>|string,
-     *      from?: array<mixed>|string,
-     *      join?: array<JoinFromArray>,
-     *      columns?: array<string>,
-     *      where?:array<mixed>|null,
-     *      values?:array<string,mixed>,
-     *      orderBy?:array<mixed>|string,
-     *      limit?:array{limit?: int|null, offset?: int|null}|int|null,
-     *      offset?:int
-     *  } $data
-     * @param mixed $arguments Arguments to QueryBuilder constructor
-     * @deprecated Most probably
+     * @param QueryBuilderFromArray $data
      */
-    public static function fromArray(array $data, mixed ...$arguments): QueryBuilder|DriverQueryBuilder
+    public function fromArray(array $data): static
     {
-        $class = $data['class'] ?? static::class;
-        $qb = new $class(...$arguments);
-        if (!($qb instanceof QueryBuilder)) {
-            throw new TypeError('Provided class is not instance of QueryBuilder');
+        if (!isset($data['type'])) {
+            throw new ValueError('Missing type');
         }
-        if (isset($data['type'])) {
-            $qb->setType($data['type']);
-        }
+        $this->setType($data['type']);
+
         /**
-         * SELECT expressions
+         * Select expressions
          */
-        if (isset($data['select'])) {
-            if (is_array($data['select'])) {
-                foreach ($data['select'] as $select) {
-                    if (is_array($select)) {
-                        $qb->addSelectExpression(SelectExpression::fromArray($select));
-                    }
-                    if (is_string($select)) {
-                        $qb->addSelectExpression(SelectExpression::fromString($select));
-                    }
-                }
-            }
-            if (is_string($data['select'])) {
-                foreach (explode(',', $data['select']) as $select) {
-                    $qb->addSelectExpression(SelectExpression::fromString($select));
-                }
-            }
-        }
-        /**
-         * FROM expressions
-         * @note string types will cause problem with subqueries
-         */
-        if (isset($data['from'])) {
-            if (is_array($data['from'])) {
-                foreach ($data['from'] as $from) {
-                    if (is_array($from)) {
-                        $qb->addFromExpression(FromExpression::fromArray($from));
-                    } elseif (is_string($from)) {
-                        $qb->addFromExpression(FromExpression::fromString($from));
-                    }
-                }
-            } elseif (is_string($data['from'])) {
-                $qb->addFromExpression(FromExpression::fromString($data['from']));
+        if (isset($data['select']) && is_array($data['select'])) {
+            foreach ($data['select'] as $expr) {
+                $this->select(...$data['select']);
             }
         }
 
         /**
-         * JOIN expressions
+         * From expressions
+         */
+        if (isset($data['from']) && is_array($data['from'])) {
+            foreach ($data['from'] as $fromExpr) {
+                if (is_array($fromExpr)) {
+                    $expr = $fromExpr['expression'] ?? '';
+                    if (is_array($expr)) {
+                        $qb = clone $this;
+                        // @phpstan-ignore-next-line
+                        $qb->fromArray($expr);
+                        $expr = $qb;
+                    }
+                    $this->addFromExpression(
+                        $this->createFromExpression($expr, $fromExpr['alias'] ?? null)
+                    );
+                } elseif ($fromExpr instanceof FromExpression) {
+                    $this->addFromExpression($fromExpr);
+                }
+            }
+        }
+
+        /**
+         * Join expressions
          */
         if (isset($data['join']) && is_array($data['join'])) {
-            foreach ($data['join'] as $join) {
-                if (is_array($join)) {
-                    $qb->addJoinExpression(JoinExpression::fromArray($join));
+            foreach ($data['join'] as $joinExpr) {
+                if (is_array($joinExpr)) {
+                    $this->addJoinExpression(
+                        $this->createJoinExpression(
+                            $joinExpr['type'] ?? JoinType::INNER,
+                            $joinExpr['table'] ?? '',
+                            $joinExpr['on'] ?? '',
+                            $joinExpr['alias'] ?? null,
+                        )
+                    );
+                } elseif ($joinExpr instanceof JoinExpression) {
+                    $this->addJoinExpression($joinExpr);
                 }
             }
-        }
-        $qb->columns = $data['columns'] ?? [];
-        if (isset($data['where']) && is_array($data['where'])) {
-            $qb->where  = Condition::fromArray($data['where']);
         }
 
         /**
-         * orderBy expressions
+         * Columns
          */
-        if (isset($data['orderBy'])) {
-            if (is_array($data['orderBy'])) {
-                foreach ($data['orderBy'] as $orderBy) {
-                    if (is_array($orderBy)) {
-                        $qb->addOrderByExpression(OrderByExpression::fromArray($orderBy));
-                    } elseif (is_string($orderBy)) {
-                        $qb->addOrderbyExpression(OrderByExpression::fromString($orderBy));
-                    }
+        if (isset($data['columns']) && is_array($data['columns'])) {
+            $this->columns = $data['columns'];
+        }
+
+        /**
+         * Where conditions
+         */
+        if (isset($data['where']) && is_array($data['where'])) {
+            $this->where  = Condition::fromArray($data['where']);
+        }
+
+        /**
+         * Order by expressions
+         */
+        if (isset($data['orderBy']) && is_array($data['orderBy'])) {
+            foreach ($data['orderBy'] as $orderByExpr) {
+                if (is_array($orderByExpr)) {
+                    $this->addOrderByExpression(
+                        $this->createOrderByExpression(
+                            $orderByExpr['expression'] ?? '',
+                            $orderByExpr['type'] ?? 'ASC'
+                        )
+                    );
+                } elseif ($orderByExpr instanceof OrderByExpression) {
+                    $this->addOrderByExpression($orderByExpr);
                 }
-            } elseif (is_string($data['orderBy'])) {
-                $qb->addOrderByExpression(OrderByExpression::fromString($data['orderBy']));
             }
         }
 
+        /**
+         * Limit
+         */
         if (isset($data['limit'])) {
             if (is_array($data['limit'])) {
-                $qb->limit = Limit::fromArray($data['limit']);
+                $this->limit = $this->createLimit($data['limit']['limit'] ?? null, $data['limit']['offset'] ?? null);
             } else {
                 /**
                  * Limit may also be provided directly in data. So does offset.
                  */
-                $limit = [
-                    'limit' => $data['limit'],
-                    'offset' => $data['offset'] ?? null
-                ];
-                $qb->limit = Limit::fromArray($limit);
+                $this->limit = $this->createLimit($data['limit'] ?? null, $data['offset'] ?? null);
             }
         }
-        $qb->parameters = $data['parameters'] ?? [];
-        return $qb;
+
+        /**
+         * Parameters
+         */
+        if (isset($data['parameters']) && is_array($data['parameters'])) {
+            $this->parameters = $data['parameters'];
+        }
+
+        return $this;
     }
 
-    /**
-     * @return array{
-     *      class: string,
-     *      type: string,
-     *      select: array<mixed>,
-     *      from: array<mixed>,
-     *      columns: string[],
-     *      where: null|array<mixed>,
-     *      orderBy: array<mixed>,
-     *      limit: array{limit?: int|null, offset?: int|null}|null,
-     *      parameters: array<int|non-int-string, mixed>
-     * }
-     */
+    /** @return QueryBuilderToArray */
     public function toArray(): array
     {
         return [
-            'class'     => $this::class,
-            'type'      => $this->type->value,
-            'select'    => array_map(fn($expr) => $expr->toArray(), $this->select),
-            'from'      => array_map(fn($expr) => $expr->toArray(), $this->from),
-            'join'      => array_map(fn($expr) => $expr->toArray(), $this->joins),
-            'columns'   => $this->columns,
-            'where'     => $this->where === null ? null : $this->where->toArray(),
-            'orderBy'   => array_map(fn($expr) => $expr->toArray(), $this->orderBy),
-            'limit'     => ($this->limit === null ? null : $this->limit->toArray()),
+            'type'          => $this->type->value,
+            'select'        => array_map(fn($expr) => $expr->toArray(), $this->select),
+            'from'          => array_map(fn($expr) => $expr->toArray(), $this->from),
+            'join'          => array_map(fn($expr) => $expr->toArray(), $this->join),
+            'columns'       => $this->columns,
+            'where'         => $this->where === null ? null : $this->where->toArray(),
+            'orderBy'       => array_map(fn($expr) => $expr->toArray(), $this->orderBy),
+            'limit'         => ($this->limit === null ? null : $this->limit->toArray()),
             'parameters'    => $this->parameters
         ];
     }
@@ -268,18 +224,22 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Start select query
      *
-     * ```php
-     * $qb->select('colA as A', 'colB as B');
-     * ```
-     *
+     * @param string|SelectFromArray|SelectExpression $exprs
      * @see self::createSelectExpression
      */
-    public function select(string|SelectExpression ...$exprs): static
+    public function select(string|array|SelectExpression ...$exprs): static
     {
         $this->setType(Type::SELECT);
         foreach ($exprs as $expr) {
             if ($expr instanceof SelectExpression) {
                 $this->addSelectExpression($expr);
+            } elseif (is_array($expr)) {
+                $this->addSelectExpression(
+                    $this->createSelectExpression(
+                        $expr['expression'] ?? '',
+                        $expr['alias'] ?? null
+                    )
+                );
             } else {
                 $this->addSelectExpression($this->createSelectExpression($expr));
             }
@@ -294,7 +254,7 @@ class QueryBuilder implements QueryBuilderInterface
      * $qb->update('table')->values(['col' => 'val'])->where(...);
      * ```
      */
-    public function update(string|QueryBuilderInterface $from, string $as = null): static
+    public function update(string|FromExpression|QueryBuilderInterface $from, string $as = null): static
     {
         $this->setType(Type::UPDATE);
         return $this->from($from, $as);
@@ -307,7 +267,7 @@ class QueryBuilder implements QueryBuilderInterface
      * $qb->insert('table')->values(['col' => 'val']);
      * ```
      */
-    public function insert(string $into, string $as = null): static
+    public function insert(string|FromExpression $into, string $as = null): static
     {
         $this->setType(Type::INSERT);
         return $this->into($into, $as);
@@ -320,7 +280,7 @@ class QueryBuilder implements QueryBuilderInterface
      * $db->delete('table')->where('id = ?')->setParameters([1]);
      * ```
      */
-    public function delete(string|QueryBuilderInterface $from, string $as = null): static
+    public function delete(string|FromExpression|QueryBuilderInterface $from, string $as = null): static
     {
         $this->setType(Type::DELETE);
         return $this->from($from, $as);
@@ -346,8 +306,11 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * @see self::createFromExpression()
      */
-    public function into(string $from, string $as = null): static
+    public function into(string|FromExpression $from, string $as = null): static
     {
+        if ($from instanceof FromExpression) {
+            return $this->addFromExpression($from);
+        }
         return $this->addFromExpression($this->createFromExpression($from, $as));
     }
 
@@ -386,22 +349,22 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function join(string $table, string $on, string $alias = null, JoinType $type = JoinType::INNER): static
     {
-        return $this->addJoinExpression($this->createJoinExpression($table, $on, $alias, $type));
+        return $this->addJoinExpression($this->createJoinExpression($type, $table, $on, $alias));
     }
 
     public function leftJoin(string $table, string $on, string $alias = null): static
     {
-        return $this->addJoinExpression($this->createJoinExpression($table, $on, $alias, JoinType::LEFT));
+        return $this->addJoinExpression($this->createJoinExpression(JoinType::LEFT, $table, $on, $alias));
     }
 
     public function rightJoin(string $table, string $on, string $alias = null): static
     {
-        return $this->addJoinExpression($this->createJoinExpression($table, $on, $alias, JoinType::RIGHT));
+        return $this->addJoinExpression($this->createJoinExpression(JoinType::RIGHT, $table, $on, $alias));
     }
 
     public function fullJoin(string $table, string $on, string $alias = null): static
     {
-        return $this->addJoinExpression($this->createJoinExpression($table, $on, $alias, JoinType::FULL));
+        return $this->addJoinExpression($this->createJoinExpression(JoinType::FULL, $table, $on, $alias));
     }
 
     /**
@@ -558,6 +521,7 @@ class QueryBuilder implements QueryBuilderInterface
             case Type::UPDATE:
                 return $this->type->value .
                        $this->getSqlPartTable() .
+                       $this->getSqlPartJoin() .
                        $this->getSqlPartSet() .
                        $this->getSqlPartWhere() .
                        $this->getSqlPartOrderBy() .
@@ -615,7 +579,7 @@ class QueryBuilder implements QueryBuilderInterface
 
     protected function getSqlPartJoin(): string
     {
-        return empty($this->joins) ? '' : ' ' . implode(' ', array_map(fn($join) => (string)$join, $this->joins));
+        return empty($this->join) ? '' : ' ' . implode(' ', array_map(fn($join) => (string)$join, $this->join));
     }
 
     /**
@@ -679,7 +643,7 @@ class QueryBuilder implements QueryBuilderInterface
 
     protected function reset(): static
     {
-        $this->select = $this->from = $this->columns = $this->parameters = $this->orderBy = [];
+        $this->select = $this->from = $this->columns = $this->join = $this->parameters = $this->orderBy = [];
         $this->limit = $this->where = null;
         return $this;
     }
@@ -689,9 +653,9 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * @see self::select()
      */
-    protected function createSelectExpression(string $expr): SelectExpression
+    public function createSelectExpression(string $expr, string $alias = null): SelectExpression
     {
-        return SelectExpression::fromString($expr);
+        return new SelectExpression($expr, $alias);
     }
 
     /**
@@ -708,7 +672,7 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * @see self::from()
      */
-    protected function createFromExpression(string|QueryBuilderInterface $from, string $as = null): FromExpression
+    public function createFromExpression(string|QueryBuilderInterface $from, string $as = null): FromExpression
     {
         return new FromExpression($from, $as);
     }
@@ -719,18 +683,18 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    protected function createJoinExpression(
+    public function createJoinExpression(
+        string|JoinType $type,
         string $table,
         string $on,
         string $alias = null,
-        JoinType $type = JoinType::INNER
     ): JoinExpression {
         return new JoinExpression($type, $table, $on, $alias);
     }
 
     public function addJoinExpression(JoinExpression $expr): static
     {
-        $this->joins[] = $expr;
+        $this->join[] = $expr;
         return $this;
     }
 
@@ -752,8 +716,29 @@ class QueryBuilder implements QueryBuilderInterface
      *
      * @see self::limit()
      */
-    protected function createLimit(?int $limit, ?int $offset): Limit
+    public function createLimit(?int $limit, ?int $offset): Limit
     {
         return new Limit($limit, $offset);
+    }
+
+    /**
+     * Quote identifier
+     */
+    public function quoteIdentifier(string $id): string
+    {
+        if (strpos($id, '.') !== false) {
+            return (
+                implode(
+                    '.',
+                    array_map($this->quoteSingleIdentifier(...), explode('.', $id))
+                )
+            );
+        }
+        return $this->quoteSingleIdentifier($id);
+    }
+
+    public function quoteSingleIdentifier(string $id): string
+    {
+        return $this->quoteChar . $id . $this->quoteChar;
     }
 }
