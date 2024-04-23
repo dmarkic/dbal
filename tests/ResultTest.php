@@ -14,7 +14,7 @@ class ResultTest extends TestCase
         $this->assertSame(0, count($result));
     }
 
-    public function testIterator()
+    public function testIterator(): void
     {
         $result = new Result([['column' => 'value']]);
         $this->assertSame(1, count($result));
