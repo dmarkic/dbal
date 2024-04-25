@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.3 (20224-04-25)
+
+- Downgraded react-mysql to 0.6.x stable version
+
 ## v1.0.2 (2024-04-23)
 
 - QueryBuilder::quoteIdentifier()

@@ -5,7 +5,7 @@
     "license": "MIT",
     "require": {
         "php": ">=8.1.0",
-        "react/mysql": "^0.7@dev"
+        "react/mysql": "^0.6"
     },
     "autoload": {
         "psr-4": {

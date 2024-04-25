@@ -9,8 +9,10 @@ use Blrf\Dbal\Driver\Mysql\Connection;
 use Blrf\Dbal\Driver\Mysql\QueryBuilder;
 use Blrf\Tests\Dbal\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use React\Mysql\Io\Connection as MysqlConnection;
-use React\Mysql\MysqlResult;
+//use React\Mysql\Io\Connection as MysqlConnection; // react/mysql:0.7.x
+use React\MySQL\ConnectionInterface as MysqlConnection; // react/mysql:0.6.x
+//use React\Mysql\MysqlResult; // react/mysql:0.7.x
+use React\MySQL\QueryResult as MysqlResult; // react/mysql:0.6.x
 
 use function React\Async\await;
 use function React\Promise\resolve;
@@ -41,7 +43,6 @@ class ConnectionTest extends TestCase
         $params = ['param'];
 
         $config = new Config();
-
         $mysqlConnection = $this->createMock(MysqlConnection::class);
         $mysqlConnection->expects($this->once())->method('query')->with($sql, $params)->willReturn(resolve($result));
         $connection = $this->getMockBuilder(Connection::class)
