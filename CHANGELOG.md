@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.4 (2025-08-01)
+
+- upgrade phpstan
+
 ## v1.0.3 (20224-04-25)
 
 - Downgraded react-mysql to 0.6.x stable version

@@ -48,7 +48,7 @@ class Config implements Stringable
     protected ?string $db = null;
     /**
      * Parameters
-     * @var array<int|string, string[]|string>
+     * @var array<int|string, array<mixed>|string>
      */
     protected array $params = [];
 
@@ -296,14 +296,14 @@ class Config implements Stringable
         return $this->db;
     }
 
-    /** @param array<int|string, string[]|string> $params */
+    /** @param array<int|string, array<mixed>|string> $params */
     public function setParams(array $params): self
     {
         $this->params = $params;
         return $this;
     }
 
-    /** @return array<int|string, string[]|string> */
+    /** @return array<int|string, array<mixed>|string> */
     public function getParams(): array
     {
         return $this->params;
