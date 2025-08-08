@@ -4,6 +4,7 @@ namespace Blrf\Tests\Dbal;
 
 use Blrf\Dbal\QueryBuilder;
 use Blrf\Dbal\Query\Condition;
+use Blrf\Dbal\Query\ConditionBuilder;
 use Blrf\Dbal\Query\FromExpression;
 use Blrf\Dbal\Query\JoinExpression;
 use Blrf\Dbal\Query\OrderByExpression;
@@ -93,7 +94,7 @@ class QueryBuilderTest extends TestCase
             ->from('c')
             ->join('d', 'c.id = e.id', 'e')
             ->where(
-                fn($b) => $b->eq('f')
+                fn(ConditionBuilder $b) => $b->eq('f')
             )
             ->orderBy('f')
             ->orderBy(new OrderByExpression('x', 'DESC'))
@@ -121,7 +122,7 @@ class QueryBuilderTest extends TestCase
             ->from('c')
             ->leftJoin('d', 'c.id = e.id', 'e')
             ->where(
-                fn($b) => $b->eq('f')
+                fn(ConditionBuilder $b) => $b->eq('f')
             )
             ->orderBy('f')
             ->limit(1, 2)
@@ -145,7 +146,7 @@ class QueryBuilderTest extends TestCase
             ->from('c')
             ->rightJoin('d', 'c.id = d.id')
             ->where(
-                fn($b) => $b->eq('f')
+                fn(ConditionBuilder $b) => $b->eq('f')
             )
             ->orderBy('f')
             ->limit(1, 2)
@@ -169,7 +170,7 @@ class QueryBuilderTest extends TestCase
             ->from('c')
             ->fullJoin('d', 'c.id = e.id', 'e')
             ->where(
-                fn($b) => $b->eq('f')
+                fn(ConditionBuilder $b) => $b->eq('f')
             )
             ->orderBy('f')
             ->limit(1, 2)
@@ -201,7 +202,7 @@ class QueryBuilderTest extends TestCase
             ->select('a', 'b')
             ->from('c')
             ->andWhere(
-                fn($b) => $b->eq('d')
+                fn(ConditionBuilder $b) => $b->eq('d')
             )
             ->orderBy('e')
             ->limit(1, 2)
@@ -224,7 +225,7 @@ class QueryBuilderTest extends TestCase
             ->select('a', 'b')
             ->from('c')
             ->andWhere(
-                fn($b) => $b->eq('d')
+                fn(ConditionBuilder $b) => $b->eq('d')
             )
             ->orderBy('e')
             ->limit(1, 2)
@@ -249,7 +250,7 @@ class QueryBuilderTest extends TestCase
             ->select('a', 'b')
             ->from('c')
             ->orWhere(
-                fn($b) => $b->eq('d')
+                fn(ConditionBuilder $b) => $b->eq('d')
             )
             ->orderBy('e')
             ->limit(1, 2)
@@ -272,7 +273,7 @@ class QueryBuilderTest extends TestCase
             ->select('a', 'b')
             ->from('c')
             ->where(
-                fn($b) => $b->eq('d')
+                fn(ConditionBuilder $b) => $b->eq('d')
             )
             ->orderBy('e')
             ->limit(1, 2)

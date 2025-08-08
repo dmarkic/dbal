@@ -29,7 +29,7 @@ class Config implements Stringable
 {
     /**
      * Map of drivers implemented directly in this code.
-     * @var array<string,string>
+     * @var array<string,class-string>
      */
     protected static array $driverMap = [
         'mysql'     => \Blrf\Dbal\Driver\Mysql\Driver::class,
@@ -66,19 +66,45 @@ class Config implements Stringable
      * - db
      * - params
      *
-     * @param array<string, string> $data
+     * @param array{
+     *     uri?: string,
+     *     driver?: string,
+     *     host?: string,
+     *     port?: int,
+     *     user?: string,
+     *     pass?: string,
+     *     db?: string,
+     *     params?: array<int|string, array<mixed>|string>
+     * } $data
      */
     public static function fromArray(
         #[SensitiveParameter]
         array $data
     ): self {
         $config = new self();
-        $props = ['uri', 'driver', 'host', 'port', 'user', 'pass', 'db', 'params'];
-        foreach ($props as $prop) {
-            $method = 'set' . $prop;
-            if (isset($data[$prop])) {
-                $config->$method($data[$prop]);
-            }
+        if (isset($data['uri'])) {
+            $config->setUri($data['uri']);
+        }
+        if (isset($data['driver'])) {
+            $config->setDriver($data['driver']);
+        }
+        if (isset($data['host'])) {
+            $config->setHost($data['host']);
+        }
+        if (isset($data['port'])) {
+            $config->setPort((int)$data['port']);
+        }
+        if (isset($data['user'])) {
+            $config->setUser($data['user']);
+        }
+        if (isset($data['pass'])) {
+            $config->setPass($data['pass']);
+        }
+        if (isset($data['db'])) {
+            $config->setDb($data['db']);
+        }
+        if (isset($data['params'])) {
+            $config->setParams($data['params']);
         }
         return $config;
     }
@@ -88,6 +114,8 @@ class Config implements Stringable
      *
      * You can then construct uri with scheme://...
      *
+     * @param string $scheme
+     * @param class-string $class
      * @throws InvalidArgumentException If driver class is not implementing Driver interface
      * @throws InvalidArgumentException if driver scheme already exists
      */

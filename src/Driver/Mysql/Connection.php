@@ -13,6 +13,7 @@ use React\Mysql\MysqlClient;
 use React\Mysql\MysqlResult;
 */
 use React\MySQL\Factory;
+use React\MySQL\QueryResult;
 use React\Promise\PromiseInterface;
 
 use function React\Promise\resolve;
@@ -47,9 +48,9 @@ class Connection extends DriverConnection
     {
         // @phpstan-ignore-next-line
         return $this->getNativeConnection()->query($sql, $params)->then(
-            function (/*MysqlResult */$res) {
+            function (QueryResult $res) {
                 return new Result(
-                    $res->resultRows ?? [],
+                    $res->resultRows ?? [], // @phpstan-ignore argument.type
                     $res->insertId,
                     $res->affectedRows ?? 0,
                     $res->warningCount ?? 0

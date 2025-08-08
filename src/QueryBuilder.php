@@ -208,7 +208,7 @@ class QueryBuilder implements QueryBuilderInterface
     /** @return QueryBuilderToArray */
     public function toArray(): array
     {
-        return [
+        return [ /* @phpstan-ignore return.type */
             'type'          => $this->type->value,
             'select'        => array_map(fn($expr) => $expr->toArray(), $this->select),
             'from'          => array_map(fn($expr) => $expr->toArray(), $this->from),
@@ -392,6 +392,12 @@ class QueryBuilder implements QueryBuilderInterface
     {
         if (is_callable($condition)) {
             $condition = $condition(new ConditionBuilder());
+            if (
+                !($condition instanceof Condition) &&
+                !($condition instanceof ConditionGroup)
+            ) {
+                throw new ValueError('Closure should return Condition or ConditionGroup');
+            }
         }
         $this->where = $condition;
         return $this;
@@ -401,6 +407,12 @@ class QueryBuilder implements QueryBuilderInterface
     {
         if (is_callable($condition)) {
             $condition = $condition(new ConditionBuilder());
+            if (
+                !($condition instanceof Condition) &&
+                !($condition instanceof ConditionGroup)
+            ) {
+                throw new ValueError('Closure should return Condition or ConditionGroup');
+            }
         }
         if ($this->where === null) {
             $this->where = $condition;
@@ -415,6 +427,12 @@ class QueryBuilder implements QueryBuilderInterface
     {
         if (is_callable($condition)) {
             $condition = $condition(new ConditionBuilder());
+            if (
+                !($condition instanceof Condition) &&
+                !($condition instanceof ConditionGroup)
+            ) {
+                throw new ValueError('Closure should return Condition or ConditionGroup');
+            }
         }
         if ($this->where === null) {
             $this->where = $condition;
@@ -538,10 +556,6 @@ class QueryBuilder implements QueryBuilderInterface
                        $this->getSqlPartWhere() .
                        $this->getSqlPartOrderBy() .
                        $this->getSqlPartLimit();
-            default:
-                // @codeCoverageIgnoreStart
-                throw new TypeError('Unknown type: ' . $this->type->value);
-                // @codeCoverageIgnoreEnd
         }
     }
 

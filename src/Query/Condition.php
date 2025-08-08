@@ -16,11 +16,7 @@ use ValueError;
  *      value: mixed
  * }
  *
- * @phpstan-type ConditionFromArray array{
- *      expression: string,
- *      operator: string,
- *      value: mixed
- * }
+ * @phpstan-type ConditionFromArray list{string,string,string}|array{expression?:string, operator?:string, value?:string}|array{'OR': array<array<mixed>>}|array{'AND': array<array<mixed>>}
  */
 class Condition implements Stringable
 {
@@ -43,7 +39,7 @@ class Condition implements Stringable
      * If first key in data is ConditionType, it will pass the data to ConditionGroup::fromArray. So
      * this method can parse simple and Group conditions.
      *
-     * @param list{string,string,string}|array{expression?:string, operator?:string, value?:string}|array{'OR': array<array<mixed>>}|array{'AND': array<array<mixed>>} $data
+     * @param ConditionFromArray $data
      */
     public static function fromArray(array $data): static|ConditionGroup
     {
@@ -73,7 +69,7 @@ class Condition implements Stringable
         if (!is_string($operator)) {
             throw new ValueError('operator should be a string');
         }
-        if ($value !== null && !is_string($value)) {
+        if ($value !== null && !is_string($value)) { // @phpstan-ignore notIdentical.alwaysTrue
             throw new ValueError('value should be a string');
         }
         return new static($expression, $operator, $value);

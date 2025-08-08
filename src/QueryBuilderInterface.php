@@ -22,6 +22,7 @@ use Blrf\Dbal\Query\Limit;
  * @phpstan-import-type SelectToArray from SelectExpression
  * @phpstan-import-type FromFromArray from FromExpression
  * @phpstan-import-type FromToArray from FromExpression
+ * @phpstan-import-type ConditionFromArray from Condition
  * @phpstan-import-type JoinFromArray from JoinExpression
  * @phpstan-import-type JoinToArray from JoinExpression
  * @phpstan-import-type OrderByFromArray from OrderByExpression
@@ -34,7 +35,8 @@ use Blrf\Dbal\Query\Limit;
  *      select?: array<SelectFromArray>|array<SelectExpression>,
  *      from?: array<FromFromArray>|array<FromExpression>,
  *      join?: array<JoinFromArray>|array<JoinExpression>,
- *      where?: array<mixed>|null,
+ *      columns?: array<string>,
+ *      where?: ConditionFromArray|null,
  *      orderBy?: array<OrderByFromArray>|array<OrderByExpression>,
  *      limit?: int|null|LimitFromArray,
  *      offset?: int|null
@@ -45,7 +47,7 @@ use Blrf\Dbal\Query\Limit;
  *      select: array<SelectToArray>,
  *      from: array<FromToArray>,
  *      join: array<JoinToArray>,
- *      where: array<mixed>|null,
+ *      where: ConditionFromArray|null,
  *      orderBy: array<OrderByToArray>,
  *      limit: null|LimitToArray
  * }
